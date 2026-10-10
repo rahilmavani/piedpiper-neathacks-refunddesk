@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "01M4JMZ6BMZG43BYXBWC97SYAR",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "README.md",
+    "evals/email_failed_payload_three_times.json",
+    "evals/escalate_failed_payload_three_times.json",
+    "evals/escalate_failed_payload_twice.json",
+    "evals/multiturn_refund_and_email_failed_repeatedly.json",
+    "evals/refund_failed_payload_three_times.json",
+    "evals/refund_failed_payload_twice.json",
+    "tests/test_checks_and_tasks.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/0/metadata.json",
+      "transcript": "/0/full.jsonl",
+      "compact_transcript": "/0/transcript.jsonl",
+      "content_hash": "/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 14,
+    "cache_creation_tokens": 8360,
+    "cache_read_tokens": 525418,
+    "output_tokens": 5040,
+    "api_call_count": 7
+  }
+}
