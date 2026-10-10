@@ -22,6 +22,7 @@ from . import tracing
 
 
 def _trace_id(span: Any) -> str | None:
+    """Return the span's trace id as 32 hex characters, or None if it has none."""
     try:
         ctx = span.get_span_context()
         return format(ctx.trace_id, "032x") if ctx.trace_id else None
