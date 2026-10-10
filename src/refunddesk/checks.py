@@ -1,4 +1,8 @@
-"""Deterministic checkers that grade a run from the final store and the tool-call log."""
+"""Deterministic checkers that grade a run from the final store and the tool-call log.
+
+A task lists checks as ``{"check": <name>, **params}``; ``run_checks`` calls the
+function of that name with the final state, the tool-call log and the params.
+"""
 
 from __future__ import annotations
 
