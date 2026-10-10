@@ -10,7 +10,7 @@ dependencies = [
     "anthropic>=1.13.0",
     "neatlogs>=1.4.26",
     "openai>=3.28.0",
-    "python-dotenv>=1.2.4",
+    "python-dotenv==1.2.99",
 ]
 
 [project.scripts]
