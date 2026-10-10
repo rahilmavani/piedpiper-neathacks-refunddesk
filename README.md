@@ -117,3 +117,11 @@ Known limitation: the public payload API returns text input/output only. For an 
 whose response is only `tool_use` blocks, the output field is empty. The SDK records the
 request as `neatlogs.llm.tool_calls.*` attributes, but the Public API doesn't expose arbitrary
 attributes. The request is still visible in the next LLM span's input, which the verifier uses.
+
+## What the evals cover
+
+- Refunds at and around the $500 limit, partial refunds and duplicate-refund protection.
+- Orders that are not found, and lookups that keep failing (no refund, escalate).
+- Injected timeouts and `failed` payloads that the agent must retry through.
+- Multi-turn conversations that depend on details from an earlier turn.
+- Questions (status, policy) that must not trigger any action.
