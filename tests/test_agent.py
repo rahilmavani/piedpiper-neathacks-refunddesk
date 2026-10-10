@@ -55,12 +55,12 @@ def test_validate_tool_result():
     assert validate_tool_result("lookup_order", good)[0]
 
 
-def test_retries_until_success(make_runtime, scripted):
-    rt = make_runtime(faults=[{"tool": "lookup_order", "kind": "timeout", "calls": [1, 2, 3]}])
+def test_timeout_is_not_retried(make_runtime, scripted):
+    rt = make_runtime(faults=[{"tool": "lookup_order", "kind": "timeout", "calls": [1]}])
     agent = RefundDeskAgent(llm=scripted([]))
-    assert agent._run_tool_call(call("lookup_order", {"order_id": "A1"}))["status"] == "ok"
-    assert [e["outcome"] for e in rt.log] == ["timeout"] * 3 + ["ok"]
-    assert "A1" in agent.verified_orders
+    assert agent._run_tool_call(call("lookup_order", {"order_id": "A1"}))["status"] == "error"
+    assert [e["outcome"] for e in rt.log] == ["timeout"]
+    assert "A1" in agent.failed_lookups
 
 
 def test_retries_exhausted_marks_lookup_failed(make_runtime, scripted):

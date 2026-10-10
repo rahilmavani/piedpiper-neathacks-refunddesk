@@ -19,7 +19,7 @@ from .faults import ToolTimeout
 from .llm import LLMResponse, ToolCall
 from .tools import TOOL_FUNCTIONS, TOOL_SPECS, current_runtime
 
-MAX_RETRIES = 3
+MAX_RETRIES = 0
 MAX_STEPS_PER_TURN = 12
 REFUND_LIMIT_USD = 500.00
 
