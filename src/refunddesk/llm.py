@@ -14,6 +14,7 @@ model call is captured as one LLM span.
 from __future__ import annotations
 
 import json
+import logging
 import os
 from dataclasses import dataclass, field
 from typing import Any
@@ -32,6 +33,8 @@ PRICES_PER_MTOK: dict[str, tuple[float, float]] = {
     "claude-sonnet-4-6": (3.00, 15.00),
     "claude-haiku-4-5": (1.00, 5.00),
 }
+
+logger = logging.getLogger(__name__)
 
 _SAMPLING_CACHE = PROJECT_ROOT / ".cache" / "refunddesk" / "sampling.json"
 _TEMPERATURE_REJECTED = "`temperature` is deprecated for this model"
@@ -186,6 +189,7 @@ class LLMClient:
             if not (temperature_sent and _TEMPERATURE_REJECTED in str(exc)):
                 raise
             # The model rejects sampling parameters; remember that and resend without.
+            logger.info("%s rejects temperature; resending without it", self.model)
             self._temperature_ok = False
             _remember_temperature_unsupported(self.provider, self.model)
             params.pop("extra_body", None)
