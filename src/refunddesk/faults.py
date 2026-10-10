@@ -11,6 +11,11 @@ Rules select calls in one of three ways:
 * ``"rate": 0.5, "max": 2`` - fail each call with probability ``rate``, at most
   ``max`` times. The draw is a hash of (task id, seed, tool, call number), so the
   same task and seed always fail the same calls.
+
+Example::
+
+    [{"tool": "lookup_order", "kind": "timeout", "calls": [1]},
+     {"tool": "issue_refund", "kind": "failed", "rate": 0.3, "max": 1}]
 """
 
 from __future__ import annotations
