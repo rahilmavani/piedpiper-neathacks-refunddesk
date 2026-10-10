@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import contextvars
 import itertools
+import logging
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
@@ -15,6 +16,8 @@ import neatlogs
 
 from .faults import FaultPlan, ToolTimeout
 from .store import JsonStore
+
+logger = logging.getLogger(__name__)
 
 REFUND_POLICY: dict[str, Any] = {
     "max_agent_refund_usd": 500.00,
@@ -59,6 +62,8 @@ def current_runtime() -> ToolRuntime:
 def _inject(tool: str, args: dict[str, Any]) -> dict[str, Any] | None:
     rt = current_runtime()
     fault = rt.faults.next_fault(tool)
+    if fault:
+        logger.debug("injecting %s into %s", fault, tool)
     if fault == "timeout":
         rt.record(tool, args, "timeout")
         raise ToolTimeout(f"{tool} timed out")
