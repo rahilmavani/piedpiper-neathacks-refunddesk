@@ -121,7 +121,7 @@ def validate_tool_result(tool: str, result: Any) -> tuple[bool, bool, str]:
 @dataclass
 class RefundDeskAgent:
     llm: ChatModel
-    history_window: int = 24
+    history_window: int = 6
     history: list[dict[str, Any]] = field(default_factory=list)
     verified_orders: dict[str, dict[str, Any]] = field(default_factory=dict)
     failed_lookups: set[str] = field(default_factory=set)

@@ -27,7 +27,7 @@ class Settings:
     model: str
     temperature: float = 0.0
     max_output_tokens: int = 1024
-    history_window: int = 24
+    history_window: int = 6
 
 
 def load_settings() -> Settings:
@@ -42,5 +42,5 @@ def load_settings() -> Settings:
     return Settings(
         provider=provider,
         model=model,
-        history_window=int(os.environ.get("REFUNDDESK_HISTORY_WINDOW", "24")),
+        history_window=int(os.environ.get("REFUNDDESK_HISTORY_WINDOW", "6")),
     )
