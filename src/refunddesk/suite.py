@@ -40,6 +40,21 @@ def _run_one(task_id: str, rep: int, seed: int, run_id: str, commit: str) -> dic
     return result
 
 
+def _print_summary(results: list[dict], reps: int, run_id: str, commit: str, out: Path) -> list[dict]:
+    print(f"run_id={run_id} commit={commit} results={out}")
+    for rep in range(1, reps + 1):
+        rows = [r for r in results if r["repetition"] == rep]
+        passed = sum(1 for r in rows if r.get("passed"))
+        print(f"repetition {rep}: {passed}/{len(rows)} passed")
+    failures = [r for r in results if not r.get("passed")]
+    for r in failures:
+        failed_checks = [c["detail"] for c in r.get("checks", []) if not c["passed"]]
+        print(f"FAIL {r['task_id']} rep={r['repetition']} trace={r.get('trace_id')} {failed_checks or r.get('error')}")
+    total_cost = sum(r.get("cost") or 0 for r in results)
+    print(f"total: {len(results) - len(failures)}/{len(results)} passed, cost ${total_cost:.4f}")
+    return failures
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m refunddesk.suite", description=__doc__)
     parser.add_argument("--reps", type=int, default=3)
@@ -64,17 +79,7 @@ def main(argv: list[str] | None = None) -> int:
         for r in results:
             fh.write(json.dumps(r) + "\n")
 
-    print(f"run_id={run_id} commit={commit} results={out}")
-    for rep in range(1, args.reps + 1):
-        rows = [r for r in results if r["repetition"] == rep]
-        passed = sum(1 for r in rows if r.get("passed"))
-        print(f"repetition {rep}: {passed}/{len(rows)} passed")
-    failures = [r for r in results if not r.get("passed")]
-    for r in failures:
-        failed_checks = [c["detail"] for c in r.get("checks", []) if not c["passed"]]
-        print(f"FAIL {r['task_id']} rep={r['repetition']} trace={r.get('trace_id')} {failed_checks or r.get('error')}")
-    total_cost = sum(r.get("cost") or 0 for r in results)
-    print(f"total: {len(results) - len(failures)}/{len(results)} passed, cost ${total_cost:.4f}")
+    failures = _print_summary(results, args.reps, run_id, commit, out)
     return 0 if not failures else 1
 
 
