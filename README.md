@@ -35,6 +35,7 @@ and caches that decision in `.cache/refunddesk/sampling.json`. The eval output r
 
 ```bash
 uv run python -m refunddesk.eval --task refund_small_order --seed 1   # one task, prints JSON
+uv run python -m refunddesk.eval --task refund_small_order --seed 1 --tool-log   # also print the tool-call log
 uv run python -m refunddesk.suite --reps 3                             # whole suite, 3 repetitions
 uv run pytest                                                          # unit tests (no network)
 ```
