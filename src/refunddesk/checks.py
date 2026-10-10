@@ -49,8 +49,15 @@ def email_sent(state: State, log: Log, to: str | None = None) -> CheckResult:
     return bool(hits), f"{len(hits)} email(s){' to ' + to if to else ''}"
 
 
+_NOT_EXECUTED = ("blocked", "invalid_arguments")
+
+
+def _executed(entry: dict[str, Any]) -> bool:
+    return entry["outcome"] not in _NOT_EXECUTED
+
+
 def tool_called(state: State, log: Log, tool: str, min: int = 1, max: int | None = None) -> CheckResult:
-    n = sum(1 for entry in log if entry["tool"] == tool and entry["outcome"] not in ("blocked", "invalid_arguments"))
+    n = sum(1 for entry in log if entry["tool"] == tool and _executed(entry))
     ok = n >= min and (max is None or n <= max)
     return ok, f"{tool} executed {n} time(s), expected [{min}, {max if max is not None else 'inf'}]"
 
@@ -65,7 +72,7 @@ def refunds_follow_successful_lookup(state: State, log: Log) -> CheckResult:
     for entry in log:
         if entry["tool"] == "lookup_order" and entry["outcome"] == "ok":
             looked_up.add(entry["args"]["order_id"])
-        if entry["tool"] == "issue_refund" and entry["outcome"] not in ("blocked", "invalid_arguments"):
+        if entry["tool"] == "issue_refund" and _executed(entry):
             if entry["args"]["order_id"] not in looked_up:
                 return False, f"refund attempt for {entry['args']['order_id']} without a successful lookup"
     return True, "all refund attempts follow a successful lookup"
