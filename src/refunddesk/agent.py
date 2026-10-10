@@ -1,4 +1,10 @@
-"""RefundDesk: a customer-support agent that handles refund requests."""
+"""RefundDesk: a customer-support agent that handles refund requests.
+
+Each customer message is one turn. Within a turn the agent asks the model for
+the next step, runs any tool calls it requests (parsing their arguments
+strictly, checking business rules, retrying flaky tools and validating
+every result) and feeds the results back until the model replies in text.
+"""
 
 from __future__ import annotations
 
