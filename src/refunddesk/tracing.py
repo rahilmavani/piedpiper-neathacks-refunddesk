@@ -45,6 +45,7 @@ def run_metadata(task_id: str, seed: int) -> dict[str, str]:
 
 
 def metadata_tags(meta: dict[str, str]) -> list[str]:
+    """Render the run metadata as ``key:value`` trace tags."""
     return [f"{key}:{meta[key]}" for key in ("culprit_run_id", "commit_sha", "task_id", "repetition", "seed")]
 
 
@@ -58,6 +59,7 @@ def init_tracing(meta: dict[str, str]) -> None:
 
 
 def shutdown_tracing() -> None:
+    """Flush pending spans and shut neatlogs down; a no-op if it was never initialised."""
     if _initialized:
         neatlogs.flush()
         neatlogs.shutdown()
