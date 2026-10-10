@@ -49,6 +49,7 @@ def _from_file(path: Path, heldout: bool) -> Task:
 
 
 def list_tasks(include_heldout: bool = True) -> list[Task]:
+    """Return every task, sorted by file name, regular tasks before held-out ones."""
     tasks = [_from_file(p, False) for p in sorted(EVALS_DIR.glob("*.json"))]
     if include_heldout:
         tasks += [_from_file(p, True) for p in sorted(HELDOUT_DIR.glob("*.json"))]
@@ -56,6 +57,7 @@ def list_tasks(include_heldout: bool = True) -> list[Task]:
 
 
 def load_task(task_id: str) -> Task:
+    """Load one task by id, looking in ``evals/`` first and then ``evals/heldout/``."""
     for directory, heldout in ((EVALS_DIR, False), (HELDOUT_DIR, True)):
         path = directory / f"{task_id}.json"
         if path.exists():
