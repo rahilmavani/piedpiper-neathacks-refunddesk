@@ -152,7 +152,7 @@ class RefundDeskAgent:
 
     # ------------------------------------------------------------- tool calls
 
-    def _policy_block(self, name: str, args: dict[str, Any]) -> str | None:
+    def _refund_policy_violation(self, name: str, args: dict[str, Any]) -> str | None:
         """Business-rule check run before a refund is executed."""
         if name != "issue_refund":
             return None
@@ -193,7 +193,7 @@ class RefundDeskAgent:
             runtime.record(call.name, {"raw": call.arguments}, "invalid_arguments")
             return {"status": "error", "error": f"invalid arguments: {exc}"}
 
-        blocked = self._policy_block(call.name, args)
+        blocked = self._refund_policy_violation(call.name, args)
         if blocked:
             runtime.record(call.name, args, "blocked", {"error": blocked})
             return {"status": "error", "error": blocked}
