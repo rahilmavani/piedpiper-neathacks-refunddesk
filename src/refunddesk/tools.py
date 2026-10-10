@@ -64,7 +64,7 @@ def current_runtime() -> ToolRuntime:
     return _runtime.get()
 
 
-def _inject(tool: str, args: dict[str, Any]) -> dict[str, Any] | None:
+def _maybe_inject_fault(tool: str, args: dict[str, Any]) -> dict[str, Any] | None:
     rt = current_runtime()
     fault = rt.faults.next_fault(tool)
     if fault == "timeout":
@@ -85,7 +85,7 @@ def _finish(tool: str, args: dict[str, Any], result: dict[str, Any]) -> dict[str
 @neatlogs.span(kind="TOOL", tool_name="lookup_order")
 def lookup_order(order_id: str) -> dict[str, Any]:
     args = {"order_id": order_id}
-    if (failure := _inject("lookup_order", args)) is not None:
+    if (failure := _maybe_inject_fault("lookup_order", args)) is not None:
         return failure
     order = current_runtime().store.load()["orders"].get(order_id)
     if order is None:
@@ -95,7 +95,7 @@ def lookup_order(order_id: str) -> dict[str, Any]:
 
 @neatlogs.span(kind="TOOL", tool_name="get_refund_policy")
 def get_refund_policy() -> dict[str, Any]:
-    if (failure := _inject("get_refund_policy", {})) is not None:
+    if (failure := _maybe_inject_fault("get_refund_policy", {})) is not None:
         return failure
     return _finish("get_refund_policy", {}, {"status": "ok", "policy": dict(REFUND_POLICY)})
 
@@ -103,7 +103,7 @@ def get_refund_policy() -> dict[str, Any]:
 @neatlogs.span(kind="TOOL", tool_name="issue_refund")
 def issue_refund(order_id: str, amount: float, reason: str) -> dict[str, Any]:
     args = {"order_id": order_id, "amount": amount, "reason": reason}
-    if (failure := _inject("issue_refund", args)) is not None:
+    if (failure := _maybe_inject_fault("issue_refund", args)) is not None:
         return failure
     rt = current_runtime()
     state = rt.store.load()
@@ -128,7 +128,7 @@ def issue_refund(order_id: str, amount: float, reason: str) -> dict[str, Any]:
 @neatlogs.span(kind="TOOL", tool_name="escalate_to_human")
 def escalate_to_human(order_id: str, reason: str) -> dict[str, Any]:
     args = {"order_id": order_id, "reason": reason}
-    if (failure := _inject("escalate_to_human", args)) is not None:
+    if (failure := _maybe_inject_fault("escalate_to_human", args)) is not None:
         return failure
     rt = current_runtime()
     state = rt.store.load()
@@ -141,7 +141,7 @@ def escalate_to_human(order_id: str, reason: str) -> dict[str, Any]:
 @neatlogs.span(kind="TOOL", tool_name="send_customer_email")
 def send_customer_email(to: str, subject: str, body: str) -> dict[str, Any]:
     args = {"to": to, "subject": subject, "body": body}
-    if (failure := _inject("send_customer_email", args)) is not None:
+    if (failure := _maybe_inject_fault("send_customer_email", args)) is not None:
         return failure
     rt = current_runtime()
     state = rt.store.load()
