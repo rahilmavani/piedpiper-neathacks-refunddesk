@@ -69,7 +69,7 @@ def _inject(tool: str, args: dict[str, Any]) -> dict[str, Any] | None:
     return None
 
 
-def _finish(tool: str, args: dict[str, Any], result: dict[str, Any]) -> dict[str, Any]:
+def _record_result(tool: str, args: dict[str, Any], result: dict[str, Any]) -> dict[str, Any]:
     current_runtime().record(tool, args, result.get("status", "unknown"), result)
     return result
 
@@ -81,15 +81,15 @@ def lookup_order(order_id: str) -> dict[str, Any]:
         return failure
     order = current_runtime().store.load()["orders"].get(order_id)
     if order is None:
-        return _finish("lookup_order", args, {"status": "not_found", "order_id": order_id})
-    return _finish("lookup_order", args, {"status": "ok", "order": order})
+        return _record_result("lookup_order", args, {"status": "not_found", "order_id": order_id})
+    return _record_result("lookup_order", args, {"status": "ok", "order": order})
 
 
 @neatlogs.span(kind="TOOL", tool_name="get_refund_policy")
 def get_refund_policy() -> dict[str, Any]:
     if (failure := _inject("get_refund_policy", {})) is not None:
         return failure
-    return _finish("get_refund_policy", {}, {"status": "ok", "policy": dict(REFUND_POLICY)})
+    return _record_result("get_refund_policy", {}, {"status": "ok", "policy": dict(REFUND_POLICY)})
 
 
 @neatlogs.span(kind="TOOL", tool_name="issue_refund")
@@ -101,10 +101,10 @@ def issue_refund(order_id: str, amount: float, reason: str) -> dict[str, Any]:
     state = rt.store.load()
     order = state["orders"].get(order_id)
     if order is None:
-        return _finish("issue_refund", args, {"status": "rejected", "error": "unknown order"})
+        return _record_result("issue_refund", args, {"status": "rejected", "error": "unknown order"})
     remaining = round(order["amount"] - order.get("refunded_amount", 0.0), 2)
     if amount <= 0 or amount > remaining:
-        return _finish(
+        return _record_result(
             "issue_refund",
             args,
             {"status": "rejected", "error": f"amount must be > 0 and <= {remaining:.2f}"},
@@ -114,7 +114,7 @@ def issue_refund(order_id: str, amount: float, reason: str) -> dict[str, Any]:
     order["refunded_amount"] = round(order.get("refunded_amount", 0.0) + amount, 2)
     order["status"] = "refunded" if order["refunded_amount"] >= order["amount"] else order["status"]
     rt.store.save(state)
-    return _finish("issue_refund", args, {"status": "ok", "refund": refund})
+    return _record_result("issue_refund", args, {"status": "ok", "refund": refund})
 
 
 @neatlogs.span(kind="TOOL", tool_name="escalate_to_human")
@@ -127,7 +127,7 @@ def escalate_to_human(order_id: str, reason: str) -> dict[str, Any]:
     ticket = {"ticket_id": rt.new_id("ESC"), "order_id": order_id, "reason": reason}
     state["escalations"].append(ticket)
     rt.store.save(state)
-    return _finish("escalate_to_human", args, {"status": "ok", "ticket": ticket})
+    return _record_result("escalate_to_human", args, {"status": "ok", "ticket": ticket})
 
 
 @neatlogs.span(kind="TOOL", tool_name="send_customer_email")
@@ -140,7 +140,7 @@ def send_customer_email(to: str, subject: str, body: str) -> dict[str, Any]:
     email = {"message_id": rt.new_id("MSG"), "to": to, "subject": subject, "body": body}
     state["emails"].append(email)
     rt.store.save(state)
-    return _finish("send_customer_email", args, {"status": "ok", "message_id": email["message_id"]})
+    return _record_result("send_customer_email", args, {"status": "ok", "message_id": email["message_id"]})
 
 
 TOOL_FUNCTIONS: dict[str, Callable[..., dict[str, Any]]] = {
