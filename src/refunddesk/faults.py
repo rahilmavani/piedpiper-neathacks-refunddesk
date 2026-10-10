@@ -50,7 +50,7 @@ class FaultRule:
         )
 
 
-def _draw(task_id: str, seed: int, tool: str, call_no: int) -> float:
+def _seeded_draw(task_id: str, seed: int, tool: str, call_no: int) -> float:
     digest = hashlib.sha256(f"{task_id}:{seed}:{tool}:{call_no}".encode()).digest()
     return int.from_bytes(digest[:8], "big") / 2**64
 
@@ -80,7 +80,7 @@ class FaultPlan:
             hit = (
                 rule.always
                 or call_no in rule.calls
-                or (rule.rate > 0 and _draw(self.task_id, self.seed, tool, call_no) < rule.rate)
+                or (rule.rate > 0 and _seeded_draw(self.task_id, self.seed, tool, call_no) < rule.rate)
             )
             if hit:
                 self._fired[idx] = fired + 1
