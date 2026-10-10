@@ -115,6 +115,6 @@ def test_history_window_cuts_at_user_messages(scripted):
         {"role": "tool_results", "results": []},
         {"role": "assistant", "content": "b"},
     ]
-    window = agent._window()
+    window = agent._windowed_history()
     assert window[0] == {"role": "user", "content": "2"}
     assert len(window) == 4

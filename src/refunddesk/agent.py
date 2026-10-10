@@ -129,7 +129,7 @@ class RefundDeskAgent:
 
     # ----------------------------------------------------------- history window
 
-    def _window(self) -> list[dict[str, Any]]:
+    def _windowed_history(self) -> list[dict[str, Any]]:
         """Return the most recent messages, starting at a customer message.
 
         Cutting only at user messages keeps tool calls and their results together.
@@ -221,7 +221,7 @@ class RefundDeskAgent:
     def _handle_turn(self, customer_message: str) -> str:
         self.history.append({"role": "user", "content": customer_message})
         for _ in range(MAX_STEPS_PER_TURN):
-            response = self.llm.chat(SYSTEM_PROMPT, self._window(), TOOL_SPECS)
+            response = self.llm.chat(SYSTEM_PROMPT, self._windowed_history(), TOOL_SPECS)
             self.responses.append(response)
             self.history.append(
                 {
