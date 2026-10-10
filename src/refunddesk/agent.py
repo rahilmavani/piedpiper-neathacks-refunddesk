@@ -134,6 +134,7 @@ class RefundDeskAgent:
 
         Cutting only at user messages keeps tool calls and their results together.
         """
+        # Short conversations are sent in full.
         if len(self.history) <= self.history_window:
             return list(self.history)
         start = len(self.history) - self.history_window
