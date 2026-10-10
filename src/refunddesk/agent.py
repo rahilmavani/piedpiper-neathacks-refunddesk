@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import math
 from dataclasses import dataclass, field
 from typing import Any, Protocol
@@ -12,6 +13,8 @@ import neatlogs
 from .faults import ToolTimeout
 from .llm import LLMResponse, ToolCall
 from .tools import TOOL_FUNCTIONS, TOOL_SPECS, current_runtime
+
+logger = logging.getLogger(__name__)
 
 MAX_RETRIES = 3
 MAX_STEPS_PER_TURN = 12
@@ -169,6 +172,7 @@ class RefundDeskAgent:
                 result = func(**args)
             except ToolTimeout as exc:
                 last_error = str(exc)
+                logger.debug("%s attempt %d timed out", name, attempt + 1)
                 continue
             valid, retryable, reason = validate_tool_result(name, result)
             if valid:
