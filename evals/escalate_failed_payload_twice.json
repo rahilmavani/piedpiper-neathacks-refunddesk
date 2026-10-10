@@ -1,0 +1,54 @@
+{
+  "id": "escalate_failed_payload_twice",
+  "description": "Refund over $500; escalate_to_human returns a failed payload twice in a row; still escalated once, no refund.",
+  "turns": [
+    "Order A1034, my camera's lens mount is broken. I want a full refund."
+  ],
+  "store": {
+    "orders": {
+      "A1034": {
+        "order_id": "A1034",
+        "customer_name": "Omar Haddad",
+        "customer_email": "omar@example.com",
+        "item": "Mirrorless camera",
+        "amount": 1149.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [
+    {
+      "tool": "escalate_to_human",
+      "kind": "failed",
+      "calls": [
+        1,
+        2
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check": "no_refund"
+    },
+    {
+      "check": "escalated",
+      "order_id": "A1034"
+    },
+    {
+      "check": "tool_called",
+      "tool": "escalate_to_human",
+      "min": 3,
+      "max": 3
+    },
+    {
+      "check": "injected_fault_seen",
+      "tool": "escalate_to_human",
+      "kind": "failed"
+    },
+    {
+      "check": "email_sent",
+      "to": "omar@example.com"
+    }
+  ]
+}

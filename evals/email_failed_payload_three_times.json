@@ -1,0 +1,59 @@
+{
+  "id": "email_failed_payload_three_times",
+  "description": "send_customer_email returns a failed payload three times in a row; confirmation still sent and refund issued once.",
+  "turns": [
+    "Please refund order A1033, the headphones have no sound in the left ear."
+  ],
+  "store": {
+    "orders": {
+      "A1033": {
+        "order_id": "A1033",
+        "customer_name": "Mei Tanaka",
+        "customer_email": "mei@example.com",
+        "item": "Headphones",
+        "amount": 79.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [
+    {
+      "tool": "send_customer_email",
+      "kind": "failed",
+      "calls": [
+        1,
+        2,
+        3
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check": "refund_count",
+      "order_id": "A1033",
+      "count": 1
+    },
+    {
+      "check": "email_sent",
+      "to": "mei@example.com"
+    },
+    {
+      "check": "injected_fault_seen",
+      "tool": "send_customer_email",
+      "kind": "failed"
+    },
+    {
+      "check": "tool_called",
+      "tool": "send_customer_email",
+      "min": 4,
+      "max": 4
+    },
+    {
+      "check": "not_escalated"
+    },
+    {
+      "check": "refunds_follow_successful_lookup"
+    }
+  ]
+}

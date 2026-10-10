@@ -39,7 +39,7 @@ def test_refund_before_lookup_detected():
 
 def test_suite_shape():
     tasks = list_tasks()
-    assert sum(not t.heldout for t in tasks) == 20
+    assert sum(not t.heldout for t in tasks) == 26
     assert sum(t.heldout for t in tasks) == 6
-    assert len({t.id for t in tasks}) == 26
+    assert len({t.id for t in tasks}) == 32
     assert any(len(t.turns) > 1 for t in tasks)

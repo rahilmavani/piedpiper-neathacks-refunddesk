@@ -1,0 +1,59 @@
+{
+  "id": "refund_failed_payload_twice",
+  "description": "issue_refund returns a failed payload twice in a row; refund still issued exactly once.",
+  "turns": [
+    "Order A1031 arrived with a cracked screen protector. Please refund it."
+  ],
+  "store": {
+    "orders": {
+      "A1031": {
+        "order_id": "A1031",
+        "customer_name": "Priya Nair",
+        "customer_email": "priya@example.com",
+        "item": "Screen protector pack",
+        "amount": 24.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [
+    {
+      "tool": "issue_refund",
+      "kind": "failed",
+      "calls": [
+        1,
+        2
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check": "refund_count",
+      "order_id": "A1031",
+      "count": 1
+    },
+    {
+      "check": "refund_amount",
+      "order_id": "A1031",
+      "amount": 24.0
+    },
+    {
+      "check": "tool_called",
+      "tool": "issue_refund",
+      "min": 3,
+      "max": 3
+    },
+    {
+      "check": "injected_fault_seen",
+      "tool": "issue_refund",
+      "kind": "failed"
+    },
+    {
+      "check": "not_escalated"
+    },
+    {
+      "check": "refunds_follow_successful_lookup"
+    }
+  ]
+}

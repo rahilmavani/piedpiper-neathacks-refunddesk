@@ -1,0 +1,55 @@
+{
+  "id": "escalate_failed_payload_three_times",
+  "description": "Order not found; escalate_to_human returns a failed payload three times in a row; still escalated, no refund.",
+  "turns": [
+    "Refund order Z4040 please, it never showed up."
+  ],
+  "store": {
+    "orders": {
+      "A1035": {
+        "order_id": "A1035",
+        "customer_name": "Lena Fischer",
+        "customer_email": "lena@example.com",
+        "item": "Yoga mat",
+        "amount": 35.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [
+    {
+      "tool": "escalate_to_human",
+      "kind": "failed",
+      "calls": [
+        1,
+        2,
+        3
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check": "no_refund"
+    },
+    {
+      "check": "escalated"
+    },
+    {
+      "check": "tool_called",
+      "tool": "escalate_to_human",
+      "min": 4,
+      "max": 4
+    },
+    {
+      "check": "injected_fault_seen",
+      "tool": "escalate_to_human",
+      "kind": "failed"
+    },
+    {
+      "check": "tool_called",
+      "tool": "lookup_order",
+      "min": 1
+    }
+  ]
+}

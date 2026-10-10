@@ -1,0 +1,60 @@
+{
+  "id": "refund_failed_payload_three_times",
+  "description": "issue_refund returns a failed payload three times in a row; refund still issued exactly once.",
+  "turns": [
+    "I want a refund for order A1032, the blender stopped working after two days."
+  ],
+  "store": {
+    "orders": {
+      "A1032": {
+        "order_id": "A1032",
+        "customer_name": "Tom Becker",
+        "customer_email": "tom@example.com",
+        "item": "Blender",
+        "amount": 139.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [
+    {
+      "tool": "issue_refund",
+      "kind": "failed",
+      "calls": [
+        1,
+        2,
+        3
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check": "refund_count",
+      "order_id": "A1032",
+      "count": 1
+    },
+    {
+      "check": "refund_amount",
+      "order_id": "A1032",
+      "amount": 139.0
+    },
+    {
+      "check": "tool_called",
+      "tool": "issue_refund",
+      "min": 4,
+      "max": 4
+    },
+    {
+      "check": "injected_fault_seen",
+      "tool": "issue_refund",
+      "kind": "failed"
+    },
+    {
+      "check": "not_escalated"
+    },
+    {
+      "check": "refunds_follow_successful_lookup"
+    }
+  ]
+}
