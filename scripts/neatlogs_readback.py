@@ -62,11 +62,21 @@ def _cli_env() -> dict[str, str]:
     return env
 
 
+TRANSIENT = ("REQUEST_TIMEOUT", "RATE_LIMIT", "NETWORK", "UNAVAILABLE", "INTERNAL")
+CLI_ATTEMPTS = 4
+
+
 def cli(*args: str) -> dict[str, Any]:
-    proc = subprocess.run([NEATLOGS_CLI, *args, "--json"], env=_cli_env(), capture_output=True, text=True)
-    if proc.returncode != 0:
-        raise RuntimeError(f"neatlogs {' '.join(args)} failed ({proc.returncode}): {proc.stdout[-300:]} {proc.stderr[-300:]}")
-    return json.loads(proc.stdout)
+    """Run one Public CLI read; transient failures are retried with backoff (bounded)."""
+    for attempt in range(1, CLI_ATTEMPTS + 1):
+        proc = subprocess.run([NEATLOGS_CLI, *args, "--json"], env=_cli_env(), capture_output=True, text=True)
+        if proc.returncode == 0:
+            return json.loads(proc.stdout)
+        output = proc.stdout + proc.stderr
+        if attempt == CLI_ATTEMPTS or not any(code in output for code in TRANSIENT):
+            raise RuntimeError(f"neatlogs {' '.join(args)} failed ({proc.returncode}): {output[-300:]}")
+        time.sleep(2 ** attempt)
+    raise AssertionError("unreachable")
 
 
 def paged(*args: str) -> tuple[list[dict[str, Any]], bool]:
@@ -237,8 +247,20 @@ def _runs(paths: list[str]) -> list[dict[str, Any]]:
     return [json.loads(ln) for ln in lines]
 
 
+def verify_safely(run: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return verify(run)
+    except Exception as exc:  # report the failing layer instead of aborting the batch
+        return {"trace_id": run.get("trace_id"), "task_id": run.get("task_id"), "passed": False,
+                "checks": [{"check": "readback_error", "passed": False, "detail": str(exc)[:500]}]}
+
+
 def main(argv: list[str]) -> int:
-    reports = [verify(run) for run in _runs(argv) if run.get("trace_id")]
+    from concurrent.futures import ThreadPoolExecutor
+
+    runs = [run for run in _runs(argv) if run.get("trace_id")]
+    with ThreadPoolExecutor(max_workers=int(os.environ.get("READBACK_WORKERS", "4"))) as pool:
+        reports = list(pool.map(verify_safely, runs))
     for rep in reports:
         failed = [c for c in rep["checks"] if not c["passed"]]
         status = "PASS" if rep["passed"] else "FAIL"
