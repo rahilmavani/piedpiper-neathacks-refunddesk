@@ -1,0 +1,17 @@
+<task-notification>
+<task-id>bamg7rdyb</task-id>
+<tool-use-id>toolu_01UcRr9gTNN5XoagZwXmd51w</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-rahilmavani-RAHIL-MAVANI-Personal-Projects-Hackathons-neathack-refunddesk/a82dfa19-aa1b-4afb-8e91-795d285f291c/tasks/bamg7rdyb.output</output-file>
+<status>completed</status>
+<summary>Background command "Start neatlogs device login in background" completed (exit code 0)</summary>
+</task-notification>
+
+---
+
+<task-notification>
+<task-id>bvawtamw5</task-id>
+<tool-use-id>toolu_01VgBenZhG6q8nh4vQpETvow</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-rahilmavani-RAHIL-MAVANI-Personal-Projects-Hackathons-neathack-refunddesk/a82dfa19-aa1b-4afb-8e91-795d285f291c/tasks/bvawtamw5.output</output-file>
+<status>completed</status>
+<summary>Background command "Restart neatlogs device login in background" completed (exit code 0)</summary>
+</task-notification>

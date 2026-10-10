@@ -1,0 +1,133 @@
+{
+  "cli_version": "0.11.4",
+  "checkpoint_id": "01M4JDJRHCWGDWM9CBHTY5Z2M5",
+  "session_id": "a82dfa19-aa1b-4afb-8e91-795d285f291c",
+  "strategy": "manual-commit",
+  "created_at": "2026-10-10T08:06:31.609882Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "src/refunddesk/agent.py",
+    "src/refunddesk/checks.py",
+    "src/refunddesk/config.py",
+    "src/refunddesk/eval.py",
+    "src/refunddesk/faults.py",
+    "src/refunddesk/llm.py",
+    "src/refunddesk/store.py",
+    "src/refunddesk/suite.py",
+    "src/refunddesk/tasks.py",
+    "src/refunddesk/tools.py",
+    "src/refunddesk/tracing.py"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-5-5",
+  "turn_id": "a2b4368b9105",
+  "checkpoint_transcript_start": 141,
+  "transcript_lines_at_start": 141,
+  "compact_transcript_start": 16,
+  "token_usage": {
+    "input_tokens": 130,
+    "cache_creation_tokens": 202046,
+    "cache_read_tokens": 11201555,
+    "output_tokens": 69485,
+    "api_call_count": 65
+  },
+  "skill_events_version": 1,
+  "skill_events": [
+    {
+      "id": "claude-skill-toolu_01GAcLutAsT3AfiKrWz1GSyx",
+      "event_type": "tool_invocation",
+      "skill": {
+        "name": "claude-api"
+      },
+      "source": {
+        "agent": "claude-code",
+        "signal": "skill_tool_use",
+        "confidence": "explicit"
+      },
+      "turn_id": "a2b4368b9105",
+      "transcript_anchor": {
+        "unit": "line",
+        "start": 351,
+        "end": 352,
+        "entry_ids": [
+          "1fcc7188-125f-4a3e-ad09-88761d4d0053"
+        ],
+        "tool_use_id": "toolu_01GAcLutAsT3AfiKrWz1GSyx"
+      },
+      "native": {
+        "tool_name": "Skill",
+        "tool_use_id": "toolu_01GAcLutAsT3AfiKrWz1GSyx"
+      },
+      "collapse": {
+        "target": "tool_pair",
+        "label": "Skill: claude-api",
+        "default_collapsed": true
+      }
+    }
+  ],
+  "initial_attribution": {
+    "calculated_at": "2026-10-10T08:06:31.53655Z",
+    "agent_lines": 82,
+    "agent_removed": 0,
+    "human_added": 291,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 373,
+    "total_lines_changed": 373,
+    "agent_percentage": 21.983914209115284,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 4469,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        ".gitignore": 1,
+        ".python-version": 1,
+        "evals/already_refunded_no_duplicate.json": 27,
+        "evals/heldout/heldout_escalate_email_timeout.json": 47,
+        "evals/heldout/heldout_lookup_failed_once_then_refund.json": 44,
+        "evals/heldout/heldout_multiturn_partial_amount.json": 37,
+        "evals/heldout/heldout_not_found_multiturn.json": 30,
+        "evals/heldout/heldout_over_500_with_timeout.json": 43,
+        "evals/heldout/heldout_refund_499_99.json": 34,
+        "evals/lookup_failed_customer_insists.json": 41,
+        "evals/lookup_failed_no_refund.json": 40,
+        "evals/lookup_timeout_once_then_refund.json": 49,
+        "evals/multiturn_email_from_turn1.json": 36,
+        "evals/multiturn_order_id_from_turn1.json": 45,
+        "evals/multiturn_over_500_escalated.json": 31,
+        "evals/order_not_found_escalated.json": 34,
+        "evals/partial_refund_requested_amount.json": 36,
+        "evals/policy_question_no_action.json": 34,
+        "evals/refund_500_01_escalated.json": 30,
+        "evals/refund_exactly_500.json": 39,
+        "evals/refund_failed_payload_once.json": 44,
+        "evals/refund_only_requested_order.json": 44,
+        "evals/refund_over_500_escalated.json": 34,
+        "evals/refund_sends_confirmation_email.json": 35,
+        "evals/refund_small_order.json": 18,
+        "evals/refund_timeout_once.json": 44,
+        "evals/seeded_lookup_timeouts_then_refund.json": 38,
+        "evals/status_question_no_action.json": 34,
+        "pyproject.toml": 26,
+        "src/refunddesk/__init__.py": 9,
+        "src/refunddesk/agent.py": 249,
+        "src/refunddesk/checks.py": 104,
+        "src/refunddesk/config.py": 46,
+        "src/refunddesk/eval.py": 138,
+        "src/refunddesk/faults.py": 88,
+        "src/refunddesk/llm.py": 295,
+        "src/refunddesk/store.py": 33,
+        "src/refunddesk/tasks.py": 63,
+        "src/refunddesk/tools.py": 198,
+        "src/refunddesk/tracing.py": 59,
+        "uv.lock": 2191
+      }
+    }
+  ]
+}
