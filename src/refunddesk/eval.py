@@ -29,6 +29,20 @@ def _trace_id(span: Any) -> str | None:
         return None
 
 
+def _token_totals(responses: list[Any]) -> dict[str, int | None]:
+    """Sum token usage; a total is None when any response did not report it."""
+    in_tok = [r.input_tokens for r in responses]
+    out_tok = [r.output_tokens for r in responses]
+    tokens: dict[str, int | None] = {
+        "input": sum(in_tok) if all(t is not None for t in in_tok) else None,
+        "output": sum(out_tok) if all(t is not None for t in out_tok) else None,
+    }
+    tokens["total"] = (
+        tokens["input"] + tokens["output"] if None not in (tokens["input"], tokens["output"]) else None
+    )
+    return tokens
+
+
 def run_task(task_id: str, seed: int, include_tool_log: bool = False) -> dict[str, Any]:
     from .tasks import load_task
 
@@ -87,16 +101,8 @@ def run_task(task_id: str, seed: int, include_tool_log: bool = False) -> dict[st
     latency = time.perf_counter() - started
 
     responses = agent.responses
-    in_tok = [r.input_tokens for r in responses]
-    out_tok = [r.output_tokens for r in responses]
     costs = [r.cost_usd for r in responses]
-    tokens = {
-        "input": sum(in_tok) if all(t is not None for t in in_tok) else None,
-        "output": sum(out_tok) if all(t is not None for t in out_tok) else None,
-    }
-    tokens["total"] = (
-        tokens["input"] + tokens["output"] if None not in (tokens["input"], tokens["output"]) else None
-    )
+    tokens = _token_totals(responses)
     result.update(
         {
             "passed": passed,
