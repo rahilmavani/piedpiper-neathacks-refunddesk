@@ -11,6 +11,7 @@ from typing import Any, Callable
 State = dict[str, Any]
 Log = list[dict[str, Any]]
 CheckResult = tuple[bool, str]
+CheckFn = Callable[..., CheckResult]
 
 
 def _refunds(state: State, order_id: str | None = None) -> list[dict[str, Any]]:
@@ -81,7 +82,7 @@ def injected_fault_seen(state: State, log: Log, tool: str, kind: str) -> CheckRe
     return n >= 1, f"{n} injected {kind} on {tool}"
 
 
-CHECKS: dict[str, Callable[..., CheckResult]] = {
+CHECKS: dict[str, CheckFn] = {
     fn.__name__: fn
     for fn in (
         refund_count,
