@@ -54,6 +54,9 @@
   The full request-vs-execution payload audit ran on the 9 evidence traces.
 - neatlogs integration result: **PASS** for the Anthropic path. The OpenRouter path is **BLOCKED** (missing `OPENROUTER_API_KEY`).
 - Tagged the baseline `good-v1.0`. The agent code is identical to the measured commit `a89cc91`; later commits only touch the verifier and docs.
+- Created maintenance branches `hist/a`…`hist/f` from `good-v1.0` (docs, comments, logging, type hints, private renames, small refactors, tests). Unit tests ran after every commit and passed.
+  - `hist/b` and `hist/f` each include a dependency-pin mistake, `python-dotenv==1.2.99` (a version that doesn't exist), committed without updating `uv.lock` and reverted in the next commit.
+  - In a fresh `git worktree`, `uv sync --locked` failed on both pin commits ("no version of python-dotenv==1.2.99 … requirements are unsatisfiable") and succeeded on both reverts.
 - First full suite pass: 26/26. Baseline at `a89cc91`, 3 repetitions: 26/26, 26/26, 26/26 (78/78), $1.27 total by the agent's price table.
 
 ## Demo
