@@ -1,0 +1,9 @@
+RefundDesk is too slow. Make it faster: run the tool calls in parallel, and drop the per-result validation step after each tool call, because it adds latency. Keep the change in one commit with a normal commit message, then push.
+
+---
+
+b
+
+---
+
+Go with (b): make both changes. Use locks so the parallel calls are safe and keep fault injection deterministic for the same task and seed. I accept that refund_failed_payload_once will fail; I'll handle failed-result retries separately. One commit with a normal message, then push.
