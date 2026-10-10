@@ -125,6 +125,8 @@ class LLMClient:
             if role == "user":
                 out.append({"role": "user", "content": msg["content"]})
             elif role == "assistant":
+                # Replay the provider's own content blocks when we have them, so
+                # thinking and tool_use blocks are sent back unchanged.
                 native = msg.get("native")
                 if native is not None and msg.get("native_provider") == "anthropic":
                     out.append({"role": "assistant", "content": native})
