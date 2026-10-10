@@ -9,7 +9,7 @@ from __future__ import annotations
 import contextvars
 import itertools
 from dataclasses import dataclass, field
-from typing import Any, Callable
+from typing import Any, Callable, TypedDict
 
 import neatlogs
 
@@ -26,13 +26,21 @@ REFUND_POLICY: dict[str, Any] = {
 }
 
 
+class ToolLogEntry(TypedDict):
+    seq: int
+    tool: str
+    args: dict[str, Any]
+    outcome: str
+    result: Any
+
+
 @dataclass
 class ToolRuntime:
     """Per-run state shared by the tools: store, fault plan and call log."""
 
     store: JsonStore
     faults: FaultPlan
-    log: list[dict[str, Any]] = field(default_factory=list)
+    log: list[ToolLogEntry] = field(default_factory=list)
     _seq: Any = field(default_factory=lambda: itertools.count(1))
     _ids: Any = field(default_factory=lambda: itertools.count(1))
 
