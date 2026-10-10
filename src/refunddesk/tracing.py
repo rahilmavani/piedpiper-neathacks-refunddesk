@@ -5,7 +5,11 @@ from __future__ import annotations
 import os
 import subprocess
 
-import neatlogs
+# The SDK's own logger writes to stdout at INFO; the eval runner's stdout must be
+# pure JSON, so default it to WARNING before neatlogs is imported.
+os.environ.setdefault("NEATLOGS_LOG_LEVEL", "WARNING")
+
+import neatlogs  # noqa: E402
 
 from .config import PROJECT_ROOT
 
@@ -49,7 +53,7 @@ def init_tracing(meta: dict[str, str]) -> None:
     global _initialized
     if _initialized:
         return
-    neatlogs.init(workflow_name=WORKFLOW_NAME, tags=metadata_tags(meta), log_level="WARNING")
+    neatlogs.init(workflow_name=WORKFLOW_NAME, tags=metadata_tags(meta))
     _initialized = True
 
 

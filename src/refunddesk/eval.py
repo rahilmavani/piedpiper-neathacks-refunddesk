@@ -12,6 +12,7 @@ import json
 import sys
 import tempfile
 import time
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -54,7 +55,7 @@ def run_task(task_id: str, seed: int, include_tool_log: bool = False) -> dict[st
         activate(runtime)
         root_attrs = {
             "neatlogs.metadata": json.dumps(meta, sort_keys=True),
-            "input.value": json.dumps({"task_id": task.id, "seed": seed, "turns": task.turns}),
+            "input.value": json.dumps({"task_id": task.id, "seed": seed, "turns": task.turns, "metadata": meta}),
             "input.mime_type": "application/json",
             **{f"neatlogs.workflow.{k}": v for k, v in meta.items()},
         }
@@ -65,7 +66,8 @@ def run_task(task_id: str, seed: int, include_tool_log: bool = False) -> dict[st
             **root_attrs,
         ) as root:
             result["trace_id"] = _trace_id(root)
-            agent = RefundDeskAgent(llm=LLMClient(settings), history_window=settings.history_window)
+            llm = LLMClient(settings)
+            agent = RefundDeskAgent(llm=llm, history_window=settings.history_window)
             replies = []
             error = None
             try:
@@ -102,7 +104,10 @@ def run_task(task_id: str, seed: int, include_tool_log: bool = False) -> dict[st
             "latency": round(latency, 3),
             "tokens": tokens,
             "llm_calls": len(responses),
+            "llm_requests": llm.requests_sent,
             "tool_executions": sum(1 for e in tool_log if e["outcome"] not in ("blocked", "invalid_arguments")),
+            "tool_outcomes": dict(Counter(e["outcome"] for e in tool_log)),
+            "turns": len(task.turns),
             "model": settings.model,
             "provider": settings.provider,
             "temperature_sent": all(r.temperature_sent for r in responses) if responses else None,

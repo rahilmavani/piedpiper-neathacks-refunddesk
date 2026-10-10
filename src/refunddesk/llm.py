@@ -91,6 +91,7 @@ class LLMClient:
         self.provider = settings.provider
         self.model = settings.model
         self._temperature_ok = _load_sampling_cache().get(f"{self.provider}:{self.model}", True)
+        self.requests_sent = 0  # every provider request, including rejected ones
         if self.provider == "anthropic":
             import anthropic
 
@@ -179,6 +180,7 @@ class LLMClient:
         if temperature_sent:
             params["extra_body"] = {"temperature": self.settings.temperature}
         try:
+            self.requests_sent += 1
             resp = self._client.messages.create(**params)
         except self._anthropic.BadRequestError as exc:
             if not (temperature_sent and _TEMPERATURE_REJECTED in str(exc)):
@@ -188,6 +190,7 @@ class LLMClient:
             _remember_temperature_unsupported(self.provider, self.model)
             params.pop("extra_body", None)
             temperature_sent = False
+            self.requests_sent += 1
             resp = self._client.messages.create(**params)
 
         text_parts: list[str] = []
@@ -253,6 +256,7 @@ class LLMClient:
         return out
 
     def _chat_openrouter(self, system: str, messages: list[dict], tools: list[dict]) -> LLMResponse:
+        self.requests_sent += 1
         resp = self._client.chat.completions.create(
             model=self.model,
             temperature=self.settings.temperature,
