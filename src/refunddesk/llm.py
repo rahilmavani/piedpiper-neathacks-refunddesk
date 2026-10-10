@@ -31,6 +31,7 @@ PRICES_PER_MTOK: dict[str, tuple[float, float]] = {
     "claude-haiku-5-5": (0.10, 0.50),
     "claude-sonnet-4-6": (3.00, 15.00),
     "claude-haiku-4-5": (1.00, 5.00),
+    "z-ai/glm-5.3": (0.039, 4.80),  # OpenRouter listing, 2026-10-10
 }
 
 _SAMPLING_CACHE = PROJECT_ROOT / ".cache" / "refunddesk" / "sampling.json"

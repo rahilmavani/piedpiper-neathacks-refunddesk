@@ -30,15 +30,26 @@ class Settings:
     history_window: int = 24
 
 
+DEFAULT_MODELS = {"anthropic": "claude-sonnet-5-5", "openrouter": "z-ai/glm-5.3"}
+
+
+def _default_provider() -> str:
+    """Anthropic when its key is set, otherwise OpenRouter when its key is set."""
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        return "anthropic"
+    if os.environ.get("OPENROUTER_API_KEY"):
+        return "openrouter"
+    raise ConfigError("set ANTHROPIC_API_KEY (Claude Sonnet 5.5) or OPENROUTER_API_KEY (GLM 5.3)")
+
+
 def load_settings() -> Settings:
-    provider = os.environ.get("LLM_PROVIDER", "anthropic").strip().lower() or "anthropic"
+    """`LLM_PROVIDER` and `VICTIM_MODEL` win when set; otherwise both follow the available key."""
+    provider = os.environ.get("LLM_PROVIDER", "").strip().lower() or _default_provider()
     if provider not in SUPPORTED_PROVIDERS:
         raise ConfigError(
             f"LLM_PROVIDER must be one of {SUPPORTED_PROVIDERS}, got {provider!r}"
         )
-    model = os.environ.get("VICTIM_MODEL", "").strip()
-    if not model:
-        raise ConfigError("VICTIM_MODEL must be set to the model id the agent should use")
+    model = os.environ.get("VICTIM_MODEL", "").strip() or DEFAULT_MODELS[provider]
     return Settings(
         provider=provider,
         model=model,
