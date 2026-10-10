@@ -59,7 +59,7 @@ class LLMResponse:
     native: Any = field(default=None, repr=False)
 
 
-def _price(model: str) -> tuple[float, float] | None:
+def _price_per_mtok(model: str) -> tuple[float, float] | None:
     env_in, env_out = os.environ.get("VICTIM_PRICE_IN"), os.environ.get("VICTIM_PRICE_OUT")
     if env_in and env_out:
         return float(env_in), float(env_out)
@@ -204,7 +204,7 @@ class LLMClient:
         cache_read = getattr(usage, "cache_read_input_tokens", None) or 0
         cache_write = getattr(usage, "cache_creation_input_tokens", None) or 0
         cost = None
-        price = _price(self.model)
+        price = _price_per_mtok(self.model)
         if price is not None:
             p_in, p_out = price
             cost = (
@@ -284,7 +284,7 @@ class LLMClient:
         out_tok = getattr(usage, "completion_tokens", None) if usage else None
         cost = getattr(usage, "cost", None) if usage else None
         if cost is None and in_tok is not None and out_tok is not None:
-            price = _price(self.model)
+            price = _price_per_mtok(self.model)
             if price is not None:
                 cost = (in_tok * price[0] + out_tok * price[1]) / 1_000_000
         return LLMResponse(
