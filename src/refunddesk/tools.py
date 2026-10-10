@@ -102,6 +102,7 @@ def issue_refund(order_id: str, amount: float, reason: str) -> dict[str, Any]:
     order = state["orders"].get(order_id)
     if order is None:
         return _finish("issue_refund", args, {"status": "rejected", "error": "unknown order"})
+    # Partial refunds are allowed, so cap the amount at what is still unrefunded.
     remaining = round(order["amount"] - order.get("refunded_amount", 0.0), 2)
     if amount <= 0 or amount > remaining:
         return _finish(
