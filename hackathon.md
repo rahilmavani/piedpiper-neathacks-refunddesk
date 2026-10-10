@@ -49,6 +49,11 @@
     - Inside `uv run`, the SDK's `neatlogs` binary shadows the Public CLI; the verifier now resolves the CLI explicitly.
     - A transient CLI `REQUEST_TIMEOUT` aborted the verifier; it now retries with bounded backoff.
 - Unit tests: 27 passing (no network).
+- Readback of all 78 baseline traces passed: 78/78 (`READBACK_PAYLOADS=root`).
+  Full payload mode hit the Public API limit: `{"code":"RATE_LIMITED","detail":"The public API rate limit was exceeded."}`.
+  The full request-vs-execution payload audit ran on the 9 evidence traces.
+- neatlogs integration result: **PASS** for the Anthropic path. The OpenRouter path is **BLOCKED** (missing `OPENROUTER_API_KEY`).
+- Tagged the baseline `good-v1.0`. The agent code is identical to the measured commit `a89cc91`; later commits only touch the verifier and docs.
 - First full suite pass: 26/26. Baseline at `a89cc91`, 3 repetitions: 26/26, 26/26, 26/26 (78/78), $1.27 total by the agent's price table.
 
 ## Demo

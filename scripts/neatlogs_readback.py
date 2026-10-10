@@ -63,7 +63,10 @@ def _cli_env() -> dict[str, str]:
 
 
 TRANSIENT = ("REQUEST_TIMEOUT", "RATE_LIMIT", "NETWORK", "UNAVAILABLE", "INTERNAL")
-CLI_ATTEMPTS = 4
+CLI_ATTEMPTS = 5
+# "full": also read every LLM/TOOL payload (request vs execution audit; many calls).
+# "root": only the root payload (metadata); use for large batches under the rate limit.
+PAYLOADS = os.environ.get("READBACK_PAYLOADS", "full")
 
 
 def cli(*args: str) -> dict[str, Any]:
@@ -75,7 +78,8 @@ def cli(*args: str) -> dict[str, Any]:
         output = proc.stdout + proc.stderr
         if attempt == CLI_ATTEMPTS or not any(code in output for code in TRANSIENT):
             raise RuntimeError(f"neatlogs {' '.join(args)} failed ({proc.returncode}): {output[-300:]}")
-        time.sleep(2 ** attempt)
+        # The public API is rate limited per credential; back off much longer for that.
+        time.sleep(15 * attempt if "RATE_LIMIT" in output else 2 ** attempt)
     raise AssertionError("unreachable")
 
 
@@ -205,6 +209,9 @@ def verify(run: dict[str, Any]) -> dict[str, Any]:
         stored_passed = None
     check("root_payload_result", stored_passed == run["passed"], f"stored passed={stored_passed}")
 
+    if PAYLOADS != "full":
+        return _report(trace_id, run, meta, raw, checks)
+
     # Model tool requests vs actual executions. The public payload of an LLM span
     # whose response is only tool_use blocks has no output text, so the request is
     # read from the next LLM span's input, which replays the assistant tool_use turn.
@@ -228,7 +235,10 @@ def verify(run: dict[str, Any]) -> dict[str, Any]:
         last = max(children, key=lambda s: s["startedAt"], default=None)
         finals_ok &= bool(last) and payload_field(trace_id, last["spanId"], "output")["available"]
     check("final_reply_output_available", finals_ok, "")
+    return _report(trace_id, run, meta, raw, checks)
 
+
+def _report(trace_id, run, meta, raw, checks) -> dict[str, Any]:
     return {
         "trace_id": trace_id,
         "task_id": run.get("task_id"),

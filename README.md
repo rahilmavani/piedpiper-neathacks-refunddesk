@@ -98,6 +98,10 @@ uv run python scripts/neatlogs_readback.py run.json        # also accepts suite 
 - every executed tool call matching a `tool_use` request from the model
 - the run metadata in the root payload
 
+The Public API is rate limited (`RATE_LIMITED` on payload reads). Use
+`READBACK_PAYLOADS=root READBACK_WORKERS=2` for large batches. That checks structure and the root payload only.
+Keep the default `full` mode, which also checks every LLM and TOOL payload, for a few fresh runs.
+
 Manual commands it uses:
 
 ```bash
