@@ -1,0 +1,27 @@
+{
+  "id": "already_refunded_no_duplicate",
+  "description": "An order that is already refunded is not refunded again.",
+  "turns": [
+    "I want a refund for order A1014, the watch strap broke."
+  ],
+  "store": {
+    "orders": {
+      "A1014": {
+        "order_id": "A1014",
+        "customer_name": "Omar Haddad",
+        "customer_email": "omar@example.com",
+        "item": "Watch strap",
+        "amount": 35.0,
+        "status": "refunded",
+        "order_date": "2026-10-01",
+        "refunded_amount": 35.0
+      }
+    }
+  },
+  "faults": [],
+  "checks": [
+    {
+      "check": "no_refund"
+    }
+  ]
+}

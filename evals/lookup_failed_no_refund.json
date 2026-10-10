@@ -1,0 +1,40 @@
+{
+  "id": "lookup_failed_no_refund",
+  "description": "No refund when the order lookup keeps failing; escalate instead.",
+  "turns": [
+    "Order A1004 - the coffee grinder is broken. Refund me please."
+  ],
+  "store": {
+    "orders": {
+      "A1004": {
+        "order_id": "A1004",
+        "customer_name": "Sam Okafor",
+        "customer_email": "sam@example.com",
+        "item": "Coffee grinder",
+        "amount": 64.5,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [
+    {
+      "tool": "lookup_order",
+      "kind": "failed",
+      "always": true
+    }
+  ],
+  "checks": [
+    {
+      "check": "no_refund"
+    },
+    {
+      "check": "escalated"
+    },
+    {
+      "check": "injected_fault_seen",
+      "tool": "lookup_order",
+      "kind": "failed"
+    }
+  ]
+}

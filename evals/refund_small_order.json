@@ -1,0 +1,18 @@
+{
+  "id": "refund_small_order",
+  "description": "Refund issued exactly once for an order under $500.",
+  "turns": ["Hi, my order A1001 (wireless headphones) arrived broken. Please refund it."],
+  "store": {
+    "orders": {
+      "A1001": {"order_id": "A1001", "customer_name": "Maya Patel", "customer_email": "maya@example.com",
+                "item": "Wireless headphones", "amount": 79.99, "status": "delivered", "order_date": "2026-10-01"}
+    }
+  },
+  "faults": [],
+  "checks": [
+    {"check": "refund_count", "order_id": "A1001", "count": 1},
+    {"check": "refund_amount", "order_id": "A1001", "amount": 79.99},
+    {"check": "not_escalated"},
+    {"check": "refunds_follow_successful_lookup"}
+  ]
+}

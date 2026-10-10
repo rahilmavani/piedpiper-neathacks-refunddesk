@@ -1,0 +1,34 @@
+{
+  "id": "status_question_no_action",
+  "description": "An order-status question gets no refund and no escalation.",
+  "turns": [
+    "Where is my order A1012? Has it shipped yet?"
+  ],
+  "store": {
+    "orders": {
+      "A1012": {
+        "order_id": "A1012",
+        "customer_name": "Raj Mehta",
+        "customer_email": "raj@example.com",
+        "item": "Backpack",
+        "amount": 59.0,
+        "status": "shipped",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [],
+  "checks": [
+    {
+      "check": "no_refund"
+    },
+    {
+      "check": "not_escalated"
+    },
+    {
+      "check": "tool_called",
+      "tool": "lookup_order",
+      "min": 1
+    }
+  ]
+}

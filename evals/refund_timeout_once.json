@@ -1,0 +1,44 @@
+{
+  "id": "refund_timeout_once",
+  "description": "issue_refund times out once; refund still issued exactly once.",
+  "turns": [
+    "Please refund order A1010, the toaster sparks when used."
+  ],
+  "store": {
+    "orders": {
+      "A1010": {
+        "order_id": "A1010",
+        "customer_name": "Eva Novak",
+        "customer_email": "eva@example.com",
+        "item": "Toaster",
+        "amount": 39.99,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [
+    {
+      "tool": "issue_refund",
+      "kind": "timeout",
+      "calls": [
+        1
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check": "refund_count",
+      "order_id": "A1010",
+      "count": 1
+    },
+    {
+      "check": "injected_fault_seen",
+      "tool": "issue_refund",
+      "kind": "timeout"
+    },
+    {
+      "check": "refunds_follow_successful_lookup"
+    }
+  ]
+}

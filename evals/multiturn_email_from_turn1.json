@@ -1,0 +1,36 @@
+{
+  "id": "multiturn_email_from_turn1",
+  "description": "Sends the confirmation to the address the customer gave in an earlier turn.",
+  "turns": [
+    "Hi, my order number is A1019. Please send any emails to jane.work@example.com, not my account email.",
+    "The kettle I got leaks water. I want a refund."
+  ],
+  "store": {
+    "orders": {
+      "A1019": {
+        "order_id": "A1019",
+        "customer_name": "Jane Doe",
+        "customer_email": "jane.doe@example.com",
+        "item": "Electric kettle",
+        "amount": 49.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [],
+  "checks": [
+    {
+      "check": "refund_count",
+      "order_id": "A1019",
+      "count": 1
+    },
+    {
+      "check": "email_sent",
+      "to": "jane.work@example.com"
+    },
+    {
+      "check": "refunds_follow_successful_lookup"
+    }
+  ]
+}

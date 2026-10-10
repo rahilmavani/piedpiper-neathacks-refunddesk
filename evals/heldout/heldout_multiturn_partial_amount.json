@@ -1,0 +1,37 @@
+{
+  "id": "heldout_multiturn_partial_amount",
+  "description": "Partial amount given in turn 1 is used when the refund is asked in turn 2.",
+  "turns": [
+    "Order B2004 - I was charged $35.50 extra for gift wrapping that never happened.",
+    "Can you refund that extra charge?"
+  ],
+  "store": {
+    "orders": {
+      "B2004": {
+        "order_id": "B2004",
+        "customer_name": "Lucia Romano",
+        "customer_email": "lucia@example.com",
+        "item": "Board game",
+        "amount": 85.5,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [],
+  "checks": [
+    {
+      "check": "refund_count",
+      "order_id": "B2004",
+      "count": 1
+    },
+    {
+      "check": "refund_amount",
+      "order_id": "B2004",
+      "amount": 35.5
+    },
+    {
+      "check": "refunds_follow_successful_lookup"
+    }
+  ]
+}

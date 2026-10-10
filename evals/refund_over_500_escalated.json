@@ -1,0 +1,34 @@
+{
+  "id": "refund_over_500_escalated",
+  "description": "Refund over $500 is escalated to a human, not issued.",
+  "turns": [
+    "My laptop from order A1002 has a dead screen. I want a full refund please."
+  ],
+  "store": {
+    "orders": {
+      "A1002": {
+        "order_id": "A1002",
+        "customer_name": "Leo Brandt",
+        "customer_email": "leo@example.com",
+        "item": "Laptop",
+        "amount": 899.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [],
+  "checks": [
+    {
+      "check": "no_refund"
+    },
+    {
+      "check": "escalated",
+      "order_id": "A1002"
+    },
+    {
+      "check": "email_sent",
+      "to": "leo@example.com"
+    }
+  ]
+}

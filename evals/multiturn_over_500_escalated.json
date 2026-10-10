@@ -1,0 +1,31 @@
+{
+  "id": "multiturn_over_500_escalated",
+  "description": "Order id given in turn 1, refund asked in turn 2; amount over $500 so escalate.",
+  "turns": [
+    "Hi, I have a problem with order A1015, the TV has dead pixels.",
+    "I'd like a refund for it."
+  ],
+  "store": {
+    "orders": {
+      "A1015": {
+        "order_id": "A1015",
+        "customer_name": "Grace Liu",
+        "customer_email": "grace@example.com",
+        "item": "4K TV",
+        "amount": 650.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [],
+  "checks": [
+    {
+      "check": "no_refund"
+    },
+    {
+      "check": "escalated",
+      "order_id": "A1015"
+    }
+  ]
+}

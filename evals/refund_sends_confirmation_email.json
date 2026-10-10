@@ -1,0 +1,35 @@
+{
+  "id": "refund_sends_confirmation_email",
+  "description": "After a refund the customer gets an email at the order's address.",
+  "turns": [
+    "Hi! Order A1011, the yoga mat smells of chemicals. Refund it please."
+  ],
+  "store": {
+    "orders": {
+      "A1011": {
+        "order_id": "A1011",
+        "customer_name": "Lena Berg",
+        "customer_email": "lena.berg@example.com",
+        "item": "Yoga mat",
+        "amount": 29.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [],
+  "checks": [
+    {
+      "check": "refund_count",
+      "order_id": "A1011",
+      "count": 1
+    },
+    {
+      "check": "email_sent",
+      "to": "lena.berg@example.com"
+    },
+    {
+      "check": "refunds_follow_successful_lookup"
+    }
+  ]
+}

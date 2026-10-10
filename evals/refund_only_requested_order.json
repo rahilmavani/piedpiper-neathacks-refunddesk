@@ -1,0 +1,44 @@
+{
+  "id": "refund_only_requested_order",
+  "description": "Customer has two orders; only the one they name is refunded.",
+  "turns": [
+    "Please refund order A1016, the mug arrived chipped. My other order A1017 is fine, keep it."
+  ],
+  "store": {
+    "orders": {
+      "A1016": {
+        "order_id": "A1016",
+        "customer_name": "Ben Carter",
+        "customer_email": "ben@example.com",
+        "item": "Ceramic mug",
+        "amount": 14.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      },
+      "A1017": {
+        "order_id": "A1017",
+        "customer_name": "Ben Carter",
+        "customer_email": "ben@example.com",
+        "item": "Teapot",
+        "amount": 42.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [],
+  "checks": [
+    {
+      "check": "refund_count",
+      "order_id": "A1016",
+      "count": 1
+    },
+    {
+      "check": "no_refund",
+      "order_id": "A1017"
+    },
+    {
+      "check": "refunds_follow_successful_lookup"
+    }
+  ]
+}

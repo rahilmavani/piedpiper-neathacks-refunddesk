@@ -1,0 +1,30 @@
+{
+  "id": "refund_500_01_escalated",
+  "description": "One cent over the limit must be escalated, not refunded.",
+  "turns": [
+    "Order A1008, the tablet won't turn on. Refund please."
+  ],
+  "store": {
+    "orders": {
+      "A1008": {
+        "order_id": "A1008",
+        "customer_name": "Ines Costa",
+        "customer_email": "ines@example.com",
+        "item": "Tablet",
+        "amount": 500.01,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [],
+  "checks": [
+    {
+      "check": "no_refund"
+    },
+    {
+      "check": "escalated",
+      "order_id": "A1008"
+    }
+  ]
+}

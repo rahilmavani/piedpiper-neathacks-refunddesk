@@ -1,0 +1,34 @@
+{
+  "id": "heldout_refund_499_99",
+  "description": "A $499.99 refund is within the limit and issued once.",
+  "turns": [
+    "Please refund order B2005, the camera lens is scratched."
+  ],
+  "store": {
+    "orders": {
+      "B2005": {
+        "order_id": "B2005",
+        "customer_name": "Kai Nakamura",
+        "customer_email": "kai@example.com",
+        "item": "Camera lens",
+        "amount": 499.99,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [],
+  "checks": [
+    {
+      "check": "refund_count",
+      "order_id": "B2005",
+      "count": 1
+    },
+    {
+      "check": "not_escalated"
+    },
+    {
+      "check": "refunds_follow_successful_lookup"
+    }
+  ]
+}

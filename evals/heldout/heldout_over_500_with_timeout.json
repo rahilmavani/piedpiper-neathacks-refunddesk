@@ -1,0 +1,43 @@
+{
+  "id": "heldout_over_500_with_timeout",
+  "description": "Lookup times out once on an order over $500; escalate, no refund.",
+  "turns": [
+    "Order B2001, the espresso machine leaks. Full refund please."
+  ],
+  "store": {
+    "orders": {
+      "B2001": {
+        "order_id": "B2001",
+        "customer_name": "Hugo Lambert",
+        "customer_email": "hugo@example.com",
+        "item": "Espresso machine",
+        "amount": 720.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [
+    {
+      "tool": "lookup_order",
+      "kind": "timeout",
+      "calls": [
+        1
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check": "no_refund"
+    },
+    {
+      "check": "escalated",
+      "order_id": "B2001"
+    },
+    {
+      "check": "injected_fault_seen",
+      "tool": "lookup_order",
+      "kind": "timeout"
+    }
+  ]
+}

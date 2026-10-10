@@ -1,0 +1,39 @@
+{
+  "id": "refund_exactly_500",
+  "description": "A refund of exactly $500.00 is within the agent's limit.",
+  "turns": [
+    "Order A1007: the monitor was delivered damaged. Please refund the full amount."
+  ],
+  "store": {
+    "orders": {
+      "A1007": {
+        "order_id": "A1007",
+        "customer_name": "Tom Fischer",
+        "customer_email": "tom@example.com",
+        "item": "Monitor",
+        "amount": 500.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [],
+  "checks": [
+    {
+      "check": "refund_count",
+      "order_id": "A1007",
+      "count": 1
+    },
+    {
+      "check": "refund_amount",
+      "order_id": "A1007",
+      "amount": 500.0
+    },
+    {
+      "check": "not_escalated"
+    },
+    {
+      "check": "refunds_follow_successful_lookup"
+    }
+  ]
+}

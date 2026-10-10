@@ -1,0 +1,49 @@
+{
+  "id": "lookup_timeout_once_then_refund",
+  "description": "Succeeds despite one injected timeout on the order lookup.",
+  "turns": [
+    "Hi, order A1005 arrived with a cracked phone case. I'd like a refund."
+  ],
+  "store": {
+    "orders": {
+      "A1005": {
+        "order_id": "A1005",
+        "customer_name": "Kim Lee",
+        "customer_email": "kim@example.com",
+        "item": "Phone case",
+        "amount": 19.99,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [
+    {
+      "tool": "lookup_order",
+      "kind": "timeout",
+      "calls": [
+        1
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check": "refund_count",
+      "order_id": "A1005",
+      "count": 1
+    },
+    {
+      "check": "refund_amount",
+      "order_id": "A1005",
+      "amount": 19.99
+    },
+    {
+      "check": "injected_fault_seen",
+      "tool": "lookup_order",
+      "kind": "timeout"
+    },
+    {
+      "check": "refunds_follow_successful_lookup"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "seeded_lookup_timeouts_then_refund",
+  "description": "Seeded random lookup timeouts (at most 2); refund still issued once.",
+  "turns": [
+    "Order A1020: the headlamp doesn't charge. Refund please."
+  ],
+  "store": {
+    "orders": {
+      "A1020": {
+        "order_id": "A1020",
+        "customer_name": "Ivan Petrov",
+        "customer_email": "ivan@example.com",
+        "item": "Headlamp",
+        "amount": 24.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [
+    {
+      "tool": "lookup_order",
+      "kind": "timeout",
+      "rate": 0.5,
+      "max": 2
+    }
+  ],
+  "checks": [
+    {
+      "check": "refund_count",
+      "order_id": "A1020",
+      "count": 1
+    },
+    {
+      "check": "refunds_follow_successful_lookup"
+    }
+  ]
+}

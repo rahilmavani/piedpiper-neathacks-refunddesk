@@ -1,0 +1,34 @@
+{
+  "id": "policy_question_no_action",
+  "description": "A policy question is answered from the policy tool with no refund.",
+  "turns": [
+    "What is your refund policy? How many days do I have to ask for a refund?"
+  ],
+  "store": {
+    "orders": {
+      "A1018": {
+        "order_id": "A1018",
+        "customer_name": "Mia Wong",
+        "customer_email": "mia@example.com",
+        "item": "Scarf",
+        "amount": 22.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [],
+  "checks": [
+    {
+      "check": "tool_called",
+      "tool": "get_refund_policy",
+      "min": 1
+    },
+    {
+      "check": "no_refund"
+    },
+    {
+      "check": "not_escalated"
+    }
+  ]
+}

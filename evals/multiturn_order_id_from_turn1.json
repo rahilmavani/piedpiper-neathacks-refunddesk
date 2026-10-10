@@ -1,0 +1,45 @@
+{
+  "id": "multiturn_order_id_from_turn1",
+  "description": "Uses the order id the customer gave in an earlier turn.",
+  "turns": [
+    "Hi, this is about my order A1006. The blender stopped working after two days.",
+    "Yes, please just refund it."
+  ],
+  "store": {
+    "orders": {
+      "A1006": {
+        "order_id": "A1006",
+        "customer_name": "Priya Shah",
+        "customer_email": "priya@example.com",
+        "item": "Blender",
+        "amount": 120.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      },
+      "A1060": {
+        "order_id": "A1060",
+        "customer_name": "Priya Shah",
+        "customer_email": "priya@example.com",
+        "item": "Blender jar",
+        "amount": 25.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [],
+  "checks": [
+    {
+      "check": "refund_count",
+      "order_id": "A1006",
+      "count": 1
+    },
+    {
+      "check": "no_refund",
+      "order_id": "A1060"
+    },
+    {
+      "check": "refunds_follow_successful_lookup"
+    }
+  ]
+}

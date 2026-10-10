@@ -1,0 +1,30 @@
+{
+  "id": "heldout_not_found_multiturn",
+  "description": "Order id given in turn 2 doesn't exist; escalate, no refund.",
+  "turns": [
+    "Hi, I need help with a refund.",
+    "The order number is B9999 - the chair arrived broken."
+  ],
+  "store": {
+    "orders": {
+      "B2002": {
+        "order_id": "B2002",
+        "customer_name": "Ada Obi",
+        "customer_email": "ada@example.com",
+        "item": "Office chair",
+        "amount": 150.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [],
+  "checks": [
+    {
+      "check": "no_refund"
+    },
+    {
+      "check": "escalated"
+    }
+  ]
+}

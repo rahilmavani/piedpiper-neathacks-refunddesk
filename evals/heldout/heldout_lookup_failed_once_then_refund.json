@@ -1,0 +1,44 @@
+{
+  "id": "heldout_lookup_failed_once_then_refund",
+  "description": "Lookup returns a failed payload once, then succeeds; refund once.",
+  "turns": [
+    "Order B2003, the earbuds case is cracked. Please refund."
+  ],
+  "store": {
+    "orders": {
+      "B2003": {
+        "order_id": "B2003",
+        "customer_name": "Finn Walsh",
+        "customer_email": "finn@example.com",
+        "item": "Earbuds",
+        "amount": 59.99,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [
+    {
+      "tool": "lookup_order",
+      "kind": "failed",
+      "calls": [
+        1
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check": "refund_count",
+      "order_id": "B2003",
+      "count": 1
+    },
+    {
+      "check": "injected_fault_seen",
+      "tool": "lookup_order",
+      "kind": "failed"
+    },
+    {
+      "check": "refunds_follow_successful_lookup"
+    }
+  ]
+}

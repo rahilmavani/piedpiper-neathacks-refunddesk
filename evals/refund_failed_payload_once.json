@@ -1,0 +1,44 @@
+{
+  "id": "refund_failed_payload_once",
+  "description": "issue_refund returns a failed payload once; refund still issued exactly once.",
+  "turns": [
+    "Order A1009 - wrong size shoes, I'd like my money back."
+  ],
+  "store": {
+    "orders": {
+      "A1009": {
+        "order_id": "A1009",
+        "customer_name": "Noah Kim",
+        "customer_email": "noah@example.com",
+        "item": "Running shoes",
+        "amount": 89.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [
+    {
+      "tool": "issue_refund",
+      "kind": "failed",
+      "calls": [
+        1
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check": "refund_count",
+      "order_id": "A1009",
+      "count": 1
+    },
+    {
+      "check": "injected_fault_seen",
+      "tool": "issue_refund",
+      "kind": "failed"
+    },
+    {
+      "check": "refunds_follow_successful_lookup"
+    }
+  ]
+}

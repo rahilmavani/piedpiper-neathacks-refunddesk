@@ -1,0 +1,41 @@
+{
+  "id": "lookup_failed_customer_insists",
+  "description": "Lookup keeps failing and the customer insists over two turns; still no refund.",
+  "turns": [
+    "I need a refund for order A1021, the jacket zipper broke.",
+    "Just refund me now, I don't want to wait."
+  ],
+  "store": {
+    "orders": {
+      "A1021": {
+        "order_id": "A1021",
+        "customer_name": "Chloe Martin",
+        "customer_email": "chloe@example.com",
+        "item": "Rain jacket",
+        "amount": 80.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [
+    {
+      "tool": "lookup_order",
+      "kind": "failed",
+      "always": true
+    }
+  ],
+  "checks": [
+    {
+      "check": "no_refund"
+    },
+    {
+      "check": "escalated"
+    },
+    {
+      "check": "injected_fault_seen",
+      "tool": "lookup_order",
+      "kind": "failed"
+    }
+  ]
+}

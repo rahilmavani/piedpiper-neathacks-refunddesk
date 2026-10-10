@@ -1,0 +1,47 @@
+{
+  "id": "heldout_escalate_email_timeout",
+  "description": "Over-limit order escalated; the follow-up email times out once and is retried.",
+  "turns": [
+    "Order B2006, the e-bike battery died. I want a refund."
+  ],
+  "store": {
+    "orders": {
+      "B2006": {
+        "order_id": "B2006",
+        "customer_name": "Sara Lind",
+        "customer_email": "sara@example.com",
+        "item": "E-bike battery",
+        "amount": 1200.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [
+    {
+      "tool": "send_customer_email",
+      "kind": "timeout",
+      "calls": [
+        1
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "check": "no_refund"
+    },
+    {
+      "check": "escalated",
+      "order_id": "B2006"
+    },
+    {
+      "check": "email_sent",
+      "to": "sara@example.com"
+    },
+    {
+      "check": "injected_fault_seen",
+      "tool": "send_customer_email",
+      "kind": "timeout"
+    }
+  ]
+}

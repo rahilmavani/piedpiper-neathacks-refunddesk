@@ -1,0 +1,36 @@
+{
+  "id": "partial_refund_requested_amount",
+  "description": "Customer asks for a specific partial amount; exactly that is refunded.",
+  "turns": [
+    "Order A1013 arrived without the charging cable. Please refund $20 for the missing cable."
+  ],
+  "store": {
+    "orders": {
+      "A1013": {
+        "order_id": "A1013",
+        "customer_name": "Zoe Adams",
+        "customer_email": "zoe@example.com",
+        "item": "Bluetooth speaker",
+        "amount": 120.0,
+        "status": "delivered",
+        "order_date": "2026-10-01"
+      }
+    }
+  },
+  "faults": [],
+  "checks": [
+    {
+      "check": "refund_count",
+      "order_id": "A1013",
+      "count": 1
+    },
+    {
+      "check": "refund_amount",
+      "order_id": "A1013",
+      "amount": 20.0
+    },
+    {
+      "check": "refunds_follow_successful_lookup"
+    }
+  ]
+}
