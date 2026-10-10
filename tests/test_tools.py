@@ -42,3 +42,12 @@ def test_escalate_and_email_recorded(make_runtime):
 
 def test_specs_match_functions():
     assert [s["name"] for s in tools.TOOL_SPECS] == list(tools.TOOL_FUNCTIONS)
+
+
+def test_refund_policy_is_a_copy(make_runtime):
+    rt = make_runtime()
+    policy = tools.get_refund_policy()["policy"]
+    assert policy["max_agent_refund_usd"] == 500.00
+    policy["max_agent_refund_usd"] = 0
+    assert tools.REFUND_POLICY["max_agent_refund_usd"] == 500.00
+    assert [e["outcome"] for e in rt.log] == ["ok"]
