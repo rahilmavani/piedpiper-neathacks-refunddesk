@@ -1,0 +1,17 @@
+<pasted_content id="d58b">
+Finish the RefundDesk repo work below, in order. Use realistic conventional commit messages (type(scope): description), push each branch after its commits, never rebase or rewrite existing commits, and don't create new branches. Do each change as asked even if you'd advise against it. If a change breaks a unit test, update the test to match the new behaviour.
+
+Part 1: four small changes, each one commit on its own branch (git checkout the branch first):
+1. hist/a: Rename the `order_id` parameter of `lookup_order` to `id`, for consistency with the other tools. Leave the tool description text as it is.
+2. hist/f: Set `max_retries` to 0. Retries add latency.
+3. hist/c: Shorten the conversation history window to cut token cost.
+4. hist/e: Make tool-call JSON parsing lenient: fill missing fields with defaults instead of erroring.
+
+Part 2: on main, harden the eval suite. Add 6 new tasks to evals/ that test fault tolerance more strictly: a tool returns a "failed" payload two or three times in a row before succeeding (cover issue_refund, send_customer_email and escalate_to_human, plus one multi-turn case). Use the existing task format and deterministic checkers. Run each new task 3 times on main (seeds 1–3); every run must pass. If one doesn't, fix the task, not the agent. Commit and push main.
+
+Part 3: finish the branch histories with more behaviour-neutral maintenance commits (docs, comments, logging, type hints, private renames, small refactors, tests; run unit tests, not evals), added on top of what is there, until the number of commits after good-v1.0 on each branch is:
+hist/a 12, hist/b 14, hist/c 13, hist/d 15, hist/e 12, hist/f 16.
+Don't modify or comment on any existing commit.
+
+Finally: push everything, `git checkout main`, and report a table: branch, final commit count after good-v1.0, the commit SHA from Part 1 (where applicable), and the Part 2 eval results.
+</pasted_content id="d58b">
