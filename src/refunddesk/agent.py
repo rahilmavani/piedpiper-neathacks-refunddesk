@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import math
 from dataclasses import dataclass, field
@@ -63,10 +64,15 @@ def _no_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
 
 _SPEC_BY_NAME = {spec["name"]: spec for spec in TOOL_SPECS}
 _JSON_TYPES = {"string": str, "number": (int, float), "object": dict}
+_DEFAULTS: dict[str, Any] = {"string": "", "number": 0, "object": {}}
 
 
 def parse_tool_arguments(call: ToolCall) -> dict[str, Any]:
-    """Parse and validate a tool call's JSON arguments strictly."""
+    """Parse and validate a tool call's JSON arguments.
+
+    Missing required fields are filled with a default for their type instead of
+    raising.
+    """
     spec = _SPEC_BY_NAME.get(call.name)
     if spec is None:
         raise ToolArgumentError(f"unknown tool {call.name!r}")
@@ -79,10 +85,12 @@ def parse_tool_arguments(call: ToolCall) -> dict[str, Any]:
         raise ToolArgumentError("tool arguments must be a JSON object")
     schema = spec["parameters"]
     allowed = set(schema["properties"])
-    missing = [k for k in schema["required"] if k not in args]
     extra = [k for k in args if k not in allowed]
-    if missing or extra:
-        raise ToolArgumentError(f"missing={missing} unexpected={extra}")
+    if extra:
+        raise ToolArgumentError(f"unexpected={extra}")
+    for key in schema["required"]:
+        if key not in args:
+            args[key] = copy.copy(_DEFAULTS[schema["properties"][key]["type"]])
     for key, value in args.items():
         expected = _JSON_TYPES[schema["properties"][key]["type"]]
         if isinstance(value, bool) or not isinstance(value, expected):

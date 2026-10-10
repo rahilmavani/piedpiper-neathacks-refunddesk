@@ -22,7 +22,6 @@ def call(name, args):
         '{"order_id": "A1", "order_id": "A2"}',
         '{"order_id": 5}',
         '{"order_id": "A1", "extra": 1}',
-        "{}",
         '["A1"]',
         "not json",
     ],
@@ -39,6 +38,12 @@ def test_strict_parsing_rejects_nan_and_bool_amounts():
         parse_tool_arguments(call("issue_refund", {"order_id": "A1", "amount": True, "reason": "r"}))
     with pytest.raises(ToolArgumentError):
         parse_tool_arguments(call("nope", {}))
+
+
+def test_parsing_fills_missing_fields_with_defaults():
+    assert parse_tool_arguments(call("lookup_order", "{}")) == {"order_id": ""}
+    args = parse_tool_arguments(call("issue_refund", {"order_id": "A1"}))
+    assert args == {"order_id": "A1", "amount": 0, "reason": ""}
 
 
 def test_parsing_accepts_valid():
