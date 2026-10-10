@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -12,6 +13,8 @@ from .config import PROJECT_ROOT
 
 EVALS_DIR = PROJECT_ROOT / "evals"
 HELDOUT_DIR = EVALS_DIR / "heldout"
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -53,6 +56,7 @@ def list_tasks(include_heldout: bool = True) -> list[Task]:
     tasks = [_from_file(p, False) for p in sorted(EVALS_DIR.glob("*.json"))]
     if include_heldout:
         tasks += [_from_file(p, True) for p in sorted(HELDOUT_DIR.glob("*.json"))]
+    logger.debug("loaded %d task(s) from %s", len(tasks), EVALS_DIR)
     return tasks
 
 
