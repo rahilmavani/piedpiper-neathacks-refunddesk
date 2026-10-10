@@ -14,22 +14,22 @@ CheckResult = tuple[bool, str]
 CheckFn = Callable[..., CheckResult]
 
 
-def _refunds(state: State, order_id: str | None = None) -> list[dict[str, Any]]:
+def _refunds_for(state: State, order_id: str | None = None) -> list[dict[str, Any]]:
     return [r for r in state["refunds"] if order_id is None or r["order_id"] == order_id]
 
 
 def refund_count(state: State, log: Log, order_id: str, count: int) -> CheckResult:
-    n = len(_refunds(state, order_id))
+    n = len(_refunds_for(state, order_id))
     return n == count, f"{n} refund(s) for {order_id}, expected {count}"
 
 
 def refund_amount(state: State, log: Log, order_id: str, amount: float) -> CheckResult:
-    total = round(sum(r["amount"] for r in _refunds(state, order_id)), 2)
+    total = round(sum(r["amount"] for r in _refunds_for(state, order_id)), 2)
     return abs(total - amount) < 0.005, f"refunded {total:.2f} for {order_id}, expected {amount:.2f}"
 
 
 def no_refund(state: State, log: Log, order_id: str | None = None) -> CheckResult:
-    n = len(_refunds(state, order_id))
+    n = len(_refunds_for(state, order_id))
     target = order_id or "any order"
     return n == 0, f"{n} refund(s) for {target}, expected none"
 
