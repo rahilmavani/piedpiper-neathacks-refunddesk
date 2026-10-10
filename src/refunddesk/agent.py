@@ -162,6 +162,8 @@ class RefundDeskAgent:
     def _execute_with_retries(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
         func = TOOL_FUNCTIONS[name]
         last_error = "unknown error"
+        # One initial attempt plus MAX_RETRIES retries. Timeouts and failed or
+        # malformed results are retried; not_found/rejected are final answers.
         for attempt in range(MAX_RETRIES + 1):
             try:
                 result = func(**args)
