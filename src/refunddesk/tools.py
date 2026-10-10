@@ -75,13 +75,13 @@ def _finish(tool: str, args: dict[str, Any], result: dict[str, Any]) -> dict[str
 
 
 @neatlogs.span(kind="TOOL", tool_name="lookup_order")
-def lookup_order(order_id: str) -> dict[str, Any]:
-    args = {"order_id": order_id}
+def lookup_order(id: str) -> dict[str, Any]:
+    args = {"id": id}
     if (failure := _inject("lookup_order", args)) is not None:
         return failure
-    order = current_runtime().store.load()["orders"].get(order_id)
+    order = current_runtime().store.load()["orders"].get(id)
     if order is None:
-        return _finish("lookup_order", args, {"status": "not_found", "order_id": order_id})
+        return _finish("lookup_order", args, {"status": "not_found", "order_id": id})
     return _finish("lookup_order", args, {"status": "ok", "order": order})
 
 
@@ -165,7 +165,7 @@ TOOL_SPECS: list[dict[str, Any]] = [
     {
         "name": "lookup_order",
         "description": "Look up an order by its id. Returns status ok with the order, not_found, or failed.",
-        "parameters": _schema({"order_id": {"type": "string", "description": "Order id, e.g. A1001"}}),
+        "parameters": _schema({"id": {"type": "string", "description": "Order id, e.g. A1001"}}),
     },
     {
         "name": "get_refund_policy",

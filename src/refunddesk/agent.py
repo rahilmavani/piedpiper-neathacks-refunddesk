@@ -201,10 +201,10 @@ class RefundDeskAgent:
         result = self._execute_with_retries(call.name, args)
         if call.name == "lookup_order":
             if result.get("status") == "ok":
-                self.verified_orders[args["order_id"]] = result["order"]
-                self.failed_lookups.discard(args["order_id"])
+                self.verified_orders[args["id"]] = result["order"]
+                self.failed_lookups.discard(args["id"])
             elif result.get("status") == "error":
-                self.failed_lookups.add(args["order_id"])
+                self.failed_lookups.add(args["id"])
         return result
 
     # -------------------------------------------------------------- main loop

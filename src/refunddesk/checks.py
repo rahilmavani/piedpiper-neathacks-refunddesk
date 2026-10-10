@@ -64,7 +64,7 @@ def refunds_follow_successful_lookup(state: State, log: Log) -> CheckResult:
     looked_up: set[str] = set()
     for entry in log:
         if entry["tool"] == "lookup_order" and entry["outcome"] == "ok":
-            looked_up.add(entry["args"]["order_id"])
+            looked_up.add(entry["args"]["id"])
         if entry["tool"] == "issue_refund" and entry["outcome"] not in ("blocked", "invalid_arguments"):
             if entry["args"]["order_id"] not in looked_up:
                 return False, f"refund attempt for {entry['args']['order_id']} without a successful lookup"

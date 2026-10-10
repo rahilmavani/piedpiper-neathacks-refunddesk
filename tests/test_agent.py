@@ -58,7 +58,7 @@ def test_validate_tool_result():
 def test_retries_until_success(make_runtime, scripted):
     rt = make_runtime(faults=[{"tool": "lookup_order", "kind": "timeout", "calls": [1, 2, 3]}])
     agent = RefundDeskAgent(llm=scripted([]))
-    assert agent._run_tool_call(call("lookup_order", {"order_id": "A1"}))["status"] == "ok"
+    assert agent._run_tool_call(call("lookup_order", {"id": "A1"}))["status"] == "ok"
     assert [e["outcome"] for e in rt.log] == ["timeout"] * 3 + ["ok"]
     assert "A1" in agent.verified_orders
 
@@ -66,7 +66,7 @@ def test_retries_until_success(make_runtime, scripted):
 def test_retries_exhausted_marks_lookup_failed(make_runtime, scripted):
     rt = make_runtime(faults=[{"tool": "lookup_order", "kind": "failed", "always": True}])
     agent = RefundDeskAgent(llm=scripted([]))
-    result = agent._run_tool_call(call("lookup_order", {"order_id": "A1"}))
+    result = agent._run_tool_call(call("lookup_order", {"id": "A1"}))
     assert result["status"] == "error"
     assert len(rt.log) == MAX_RETRIES + 1
     assert "A1" in agent.failed_lookups
@@ -78,7 +78,7 @@ def test_retries_exhausted_marks_lookup_failed(make_runtime, scripted):
 def test_refund_over_limit_is_blocked(make_runtime, scripted):
     rt = make_runtime()
     agent = RefundDeskAgent(llm=scripted([]))
-    agent._run_tool_call(call("lookup_order", {"order_id": "BIG"}))
+    agent._run_tool_call(call("lookup_order", {"id": "BIG"}))
     result = agent._run_tool_call(call("issue_refund", {"order_id": "BIG", "amount": 900, "reason": "r"}))
     assert "must be escalated" in result["error"]
     assert rt.store.load()["refunds"] == []
@@ -94,7 +94,7 @@ def test_refund_without_lookup_is_blocked(make_runtime, scripted):
 def test_full_turn_with_scripted_model(make_runtime, scripted):
     rt = make_runtime()
     llm = scripted([
-        [("lookup_order", '{"order_id": "A1"}')],
+        [("lookup_order", '{"id": "A1"}')],
         [("issue_refund", '{"order_id": "A1", "amount": 20.0, "reason": "broken"}')],
         "Your refund is done.",
     ])

@@ -8,8 +8,8 @@ STATE = {
     "emails": [{"message_id": "M", "to": "T@example.com", "subject": "s", "body": "b"}],
 }
 LOG = [
-    {"seq": 1, "tool": "lookup_order", "args": {"order_id": "A1"}, "outcome": "timeout", "result": None},
-    {"seq": 2, "tool": "lookup_order", "args": {"order_id": "A1"}, "outcome": "ok", "result": {}},
+    {"seq": 1, "tool": "lookup_order", "args": {"id": "A1"}, "outcome": "timeout", "result": None},
+    {"seq": 2, "tool": "lookup_order", "args": {"id": "A1"}, "outcome": "ok", "result": {}},
     {"seq": 3, "tool": "issue_refund", "args": {"order_id": "A1", "amount": 20.0, "reason": "r"}, "outcome": "ok", "result": {}},
 ]
 
