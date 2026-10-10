@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import json
+import contextvars
 import logging
 import math
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
@@ -95,32 +97,6 @@ def parse_tool_arguments(call: ToolCall) -> dict[str, Any]:
     return args
 
 
-def validate_tool_result(tool: str, result: Any) -> tuple[bool, bool, str]:
-    """Check a tool result before the agent acts on it.
-
-    Returns ``(valid, retryable, reason)``. A valid result can be handed to the
-    model. An invalid one is retried when ``retryable`` is true.
-    """
-    if not isinstance(result, dict) or "status" not in result:
-        return False, True, "malformed tool result"
-    status = result["status"]
-    if status == "failed":
-        return False, True, result.get("error", "tool reported failure")
-    if status in ("not_found", "rejected"):
-        return True, False, status
-    if status != "ok":
-        return False, True, f"unexpected status {status!r}"
-    if tool == "lookup_order":
-        order = result.get("order")
-        if not isinstance(order, dict) or not {"order_id", "amount", "status"} <= order.keys():
-            return False, True, "order record missing required fields"
-        if not isinstance(order["amount"], (int, float)) or order["amount"] < 0:
-            return False, True, "order amount is invalid"
-    if tool == "issue_refund" and not isinstance(result.get("refund"), dict):
-        return False, True, "refund confirmation missing"
-    return True, False, "ok"
-
-
 @dataclass
 class RefundDeskAgent:
     llm: ChatModel
@@ -165,21 +141,14 @@ class RefundDeskAgent:
     def _execute_with_retries(self, name: str, args: dict[str, Any]) -> dict[str, Any]:
         func = TOOL_FUNCTIONS[name]
         last_error = "unknown error"
-        # One initial attempt plus MAX_RETRIES retries. Timeouts and failed or
-        # malformed results are retried; not_found/rejected are final answers.
+        # One initial attempt plus MAX_RETRIES retries. Only timeouts are
+        # retried; any returned result goes straight back to the model.
         for attempt in range(MAX_RETRIES + 1):
             try:
-                result = func(**args)
+                return func(**args)
             except ToolTimeout as exc:
                 last_error = str(exc)
                 logger.debug("%s attempt %d timed out", name, attempt + 1)
-                continue
-            valid, retryable, reason = validate_tool_result(name, result)
-            if valid:
-                return result
-            last_error = reason
-            if not retryable:
-                break
         return {
             "status": "error",
             "error": f"{name} failed after {MAX_RETRIES} retries: {last_error}",
@@ -203,9 +172,37 @@ class RefundDeskAgent:
             if result.get("status") == "ok":
                 self.verified_orders[args["order_id"]] = result["order"]
                 self.failed_lookups.discard(args["order_id"])
-            elif result.get("status") == "error":
+            elif result.get("status") in ("error", "failed"):
                 self.failed_lookups.add(args["order_id"])
         return result
+
+    def _run_tool_calls(self, calls: list[ToolCall]) -> list[dict[str, Any]]:
+        """Run one response's tool calls in parallel; results keep call order.
+
+        Calls to the same tool run in order on one thread, so the per-tool fault
+        counters see the same sequence for the same task and seed. Lookups finish
+        before other tools start, so a refund in the same batch sees its lookup.
+        """
+        results: dict[int, dict[str, Any]] = {}
+
+        def run_group(group: list[int]) -> None:
+            for i in group:
+                results[i] = self._run_tool_call(calls[i])
+
+        lookups = [i for i, c in enumerate(calls) if c.name == "lookup_order"]
+        others: dict[str, list[int]] = {}
+        for i, c in enumerate(calls):
+            if c.name != "lookup_order":
+                others.setdefault(c.name, []).append(i)
+        phases = [[lookups] if lookups else [], list(others.values())]
+        with ThreadPoolExecutor(max_workers=max(1, len(others))) as pool:
+            for groups in phases:
+                # Each thread gets a copy of this context so it sees the tool
+                # runtime and the current neatlogs span.
+                futures = [pool.submit(contextvars.copy_context().run, run_group, g) for g in groups]
+                for future in futures:
+                    future.result()
+        return [results[i] for i in range(len(calls))]
 
     # -------------------------------------------------------------- main loop
 
@@ -240,16 +237,14 @@ class RefundDeskAgent:
             )
             if not response.tool_calls:
                 return response.text
-            results = []
-            for call in response.tool_calls:
-                result = self._run_tool_call(call)
-                results.append(
-                    {
-                        "tool_call_id": call.id,
-                        "name": call.name,
-                        "content": json.dumps(result, sort_keys=True),
-                        "is_error": result.get("status") in ("error", "failed"),
-                    }
-                )
+            results = [
+                {
+                    "tool_call_id": call.id,
+                    "name": call.name,
+                    "content": json.dumps(result, sort_keys=True),
+                    "is_error": result.get("status") in ("error", "failed"),
+                }
+                for call, result in zip(response.tool_calls, self._run_tool_calls(response.tool_calls))
+            ]
             self.history.append({"role": "tool_results", "results": results})
         return "I'm sorry, I couldn't finish handling your request. A human agent will follow up."

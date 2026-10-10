@@ -2,12 +2,15 @@
 
 Each tool execution is one neatlogs TOOL span. Injected faults happen before the
 tool touches the store, so a timed-out or failed call never has side effects.
+Tools may run on several threads at once; ``ToolRuntime.lock`` guards the call
+log, id counters, fault plan and every store read-modify-write.
 """
 
 from __future__ import annotations
 
 import contextvars
 import itertools
+import threading
 from dataclasses import dataclass, field
 from typing import Any, Callable, TypedDict
 
@@ -43,14 +46,17 @@ class ToolRuntime:
     log: list[ToolLogEntry] = field(default_factory=list)
     _seq: Any = field(default_factory=lambda: itertools.count(1))
     _ids: Any = field(default_factory=lambda: itertools.count(1))
+    lock: threading.RLock = field(default_factory=threading.RLock)
 
     def record(self, tool: str, args: dict[str, Any], outcome: str, result: Any = None) -> None:
-        self.log.append(
-            {"seq": next(self._seq), "tool": tool, "args": args, "outcome": outcome, "result": result}
-        )
+        with self.lock:
+            self.log.append(
+                {"seq": next(self._seq), "tool": tool, "args": args, "outcome": outcome, "result": result}
+            )
 
     def new_id(self, prefix: str) -> str:
-        return f"{prefix}-{next(self._ids):04d}"
+        with self.lock:
+            return f"{prefix}-{next(self._ids):04d}"
 
 
 _runtime: contextvars.ContextVar[ToolRuntime] = contextvars.ContextVar("refunddesk_tool_runtime")
@@ -66,7 +72,8 @@ def current_runtime() -> ToolRuntime:
 
 def _maybe_inject_fault(tool: str, args: dict[str, Any]) -> dict[str, Any] | None:
     rt = current_runtime()
-    fault = rt.faults.next_fault(tool)
+    with rt.lock:
+        fault = rt.faults.next_fault(tool)
     if fault == "timeout":
         rt.record(tool, args, "timeout")
         raise ToolTimeout(f"{tool} timed out")
@@ -106,22 +113,23 @@ def issue_refund(order_id: str, amount: float, reason: str) -> dict[str, Any]:
     if (failure := _maybe_inject_fault("issue_refund", args)) is not None:
         return failure
     rt = current_runtime()
-    state = rt.store.load()
-    order = state["orders"].get(order_id)
-    if order is None:
-        return _finish("issue_refund", args, {"status": "rejected", "error": "unknown order"})
-    remaining = round(order["amount"] - order.get("refunded_amount", 0.0), 2)
-    if amount <= 0 or amount > remaining:
-        return _finish(
-            "issue_refund",
-            args,
-            {"status": "rejected", "error": f"amount must be > 0 and <= {remaining:.2f}"},
-        )
-    refund = {"refund_id": rt.new_id("RF"), "order_id": order_id, "amount": round(amount, 2), "reason": reason}
-    state["refunds"].append(refund)
-    order["refunded_amount"] = round(order.get("refunded_amount", 0.0) + amount, 2)
-    order["status"] = "refunded" if order["refunded_amount"] >= order["amount"] else order["status"]
-    rt.store.save(state)
+    with rt.lock:
+        state = rt.store.load()
+        order = state["orders"].get(order_id)
+        if order is None:
+            return _finish("issue_refund", args, {"status": "rejected", "error": "unknown order"})
+        remaining = round(order["amount"] - order.get("refunded_amount", 0.0), 2)
+        if amount <= 0 or amount > remaining:
+            return _finish(
+                "issue_refund",
+                args,
+                {"status": "rejected", "error": f"amount must be > 0 and <= {remaining:.2f}"},
+            )
+        refund = {"refund_id": rt.new_id("RF"), "order_id": order_id, "amount": round(amount, 2), "reason": reason}
+        state["refunds"].append(refund)
+        order["refunded_amount"] = round(order.get("refunded_amount", 0.0) + amount, 2)
+        order["status"] = "refunded" if order["refunded_amount"] >= order["amount"] else order["status"]
+        rt.store.save(state)
     return _finish("issue_refund", args, {"status": "ok", "refund": refund})
 
 
@@ -131,10 +139,11 @@ def escalate_to_human(order_id: str, reason: str) -> dict[str, Any]:
     if (failure := _maybe_inject_fault("escalate_to_human", args)) is not None:
         return failure
     rt = current_runtime()
-    state = rt.store.load()
-    ticket = {"ticket_id": rt.new_id("ESC"), "order_id": order_id, "reason": reason}
-    state["escalations"].append(ticket)
-    rt.store.save(state)
+    with rt.lock:
+        state = rt.store.load()
+        ticket = {"ticket_id": rt.new_id("ESC"), "order_id": order_id, "reason": reason}
+        state["escalations"].append(ticket)
+        rt.store.save(state)
     return _finish("escalate_to_human", args, {"status": "ok", "ticket": ticket})
 
 
@@ -144,10 +153,11 @@ def send_customer_email(to: str, subject: str, body: str) -> dict[str, Any]:
     if (failure := _maybe_inject_fault("send_customer_email", args)) is not None:
         return failure
     rt = current_runtime()
-    state = rt.store.load()
-    email = {"message_id": rt.new_id("MSG"), "to": to, "subject": subject, "body": body}
-    state["emails"].append(email)
-    rt.store.save(state)
+    with rt.lock:
+        state = rt.store.load()
+        email = {"message_id": rt.new_id("MSG"), "to": to, "subject": subject, "body": body}
+        state["emails"].append(email)
+        rt.store.save(state)
     return _finish("send_customer_email", args, {"status": "ok", "message_id": email["message_id"]})
 
 

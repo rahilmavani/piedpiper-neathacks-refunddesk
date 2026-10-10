@@ -7,7 +7,6 @@ from refunddesk.agent import (
     RefundDeskAgent,
     ToolArgumentError,
     parse_tool_arguments,
-    validate_tool_result,
 )
 from refunddesk.llm import ToolCall
 
@@ -46,15 +45,6 @@ def test_parsing_accepts_valid():
     assert parse_tool_arguments(call("get_refund_policy", "")) == {}
 
 
-def test_validate_tool_result():
-    assert validate_tool_result("lookup_order", {"status": "failed"})[:2] == (False, True)
-    assert validate_tool_result("lookup_order", {"status": "not_found"})[:2] == (True, False)
-    assert validate_tool_result("lookup_order", {"status": "ok", "order": {"order_id": "A"}})[:2] == (False, True)
-    assert validate_tool_result("lookup_order", "garbage")[:2] == (False, True)
-    good = {"status": "ok", "order": {"order_id": "A", "amount": 1.0, "status": "delivered"}}
-    assert validate_tool_result("lookup_order", good)[0]
-
-
 def test_retries_until_success(make_runtime, scripted):
     rt = make_runtime(faults=[{"tool": "lookup_order", "kind": "timeout", "calls": [1, 2, 3]}])
     agent = RefundDeskAgent(llm=scripted([]))
@@ -63,8 +53,16 @@ def test_retries_until_success(make_runtime, scripted):
     assert "A1" in agent.verified_orders
 
 
+def test_failed_result_is_returned_without_retry(make_runtime, scripted):
+    rt = make_runtime(faults=[{"tool": "lookup_order", "kind": "failed", "calls": [1]}])
+    agent = RefundDeskAgent(llm=scripted([]))
+    assert agent._run_tool_call(call("lookup_order", {"order_id": "A1"}))["status"] == "failed"
+    assert [e["outcome"] for e in rt.log] == ["failed"]
+    assert "A1" in agent.failed_lookups
+
+
 def test_retries_exhausted_marks_lookup_failed(make_runtime, scripted):
-    rt = make_runtime(faults=[{"tool": "lookup_order", "kind": "failed", "always": True}])
+    rt = make_runtime(faults=[{"tool": "lookup_order", "kind": "timeout", "always": True}])
     agent = RefundDeskAgent(llm=scripted([]))
     result = agent._run_tool_call(call("lookup_order", {"order_id": "A1"}))
     assert result["status"] == "error"
@@ -118,3 +116,37 @@ def test_history_window_cuts_at_user_messages(scripted):
     window = agent._window()
     assert window[0] == {"role": "user", "content": "2"}
     assert len(window) == 4
+
+
+def test_parallel_batch_runs_lookup_first_and_keeps_order(make_runtime, scripted):
+    rt = make_runtime()
+    llm = scripted([
+        [
+            ("issue_refund", '{"order_id": "A1", "amount": 20.0, "reason": "broken"}'),
+            ("lookup_order", '{"order_id": "A1"}'),
+            ("send_customer_email", '{"to": "t@example.com", "subject": "s", "body": "b"}'),
+            ("escalate_to_human", '{"order_id": "BIG", "reason": "over limit"}'),
+        ],
+        "Done.",
+    ])
+    agent = RefundDeskAgent(llm=llm)
+    agent.handle_turn("refund A1")
+    results = agent.history[2]["results"]
+    assert [r["name"] for r in results] == ["issue_refund", "lookup_order", "send_customer_email", "escalate_to_human"]
+    assert all(not r["is_error"] for r in results)
+    assert rt.log[0]["tool"] == "lookup_order"
+    state = rt.store.load()
+    assert len(state["refunds"]) == 1 and len(state["emails"]) == 1 and len(state["escalations"]) == 1
+
+
+def test_parallel_same_tool_calls_keep_fault_order(make_runtime, scripted):
+    rt = make_runtime(faults=[{"tool": "send_customer_email", "kind": "failed", "calls": [2]}])
+    llm = scripted([
+        [("send_customer_email", f'{{"to": "{n}@example.com", "subject": "s", "body": "b"}}') for n in "abc"],
+        "Done.",
+    ])
+    agent = RefundDeskAgent(llm=llm)
+    agent.handle_turn("email")
+    statuses = [json.loads(r["content"])["status"] for r in agent.history[2]["results"]]
+    assert statuses == ["ok", "failed", "ok"]
+    assert [e["to"] for e in rt.store.load()["emails"]] == ["a@example.com", "c@example.com"]

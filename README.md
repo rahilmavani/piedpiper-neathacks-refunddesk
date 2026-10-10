@@ -27,7 +27,7 @@ and caches that decision in `.cache/refunddesk/sampling.json`. The eval output r
 ## Layout
 
 - `src/refunddesk/llm.py` is the only module that talks to a model provider.
-- `src/refunddesk/agent.py` holds the agent loop. It has the system prompt with the business rules, strict tool-argument parsing, validation of every tool result, retries (`MAX_RETRIES = 3`) and a history window.
+- `src/refunddesk/agent.py` holds the agent loop. It has the system prompt with the business rules, strict tool-argument parsing, parallel execution of each response's tool calls, timeout retries (`MAX_RETRIES = 3`) and a history window.
 - `src/refunddesk/tools.py` has the mock tools over a local JSON store (`store.py`), with deterministic fault injection from `faults.py`.
 - `evals/*.json` holds 20 tasks and `evals/heldout/*.json` holds 6 more. Each task has turns, an initial store, faults and deterministic checks (`checks.py`).
 
