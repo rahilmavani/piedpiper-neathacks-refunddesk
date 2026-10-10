@@ -9,6 +9,11 @@ from typing import Any
 EMPTY_STATE: dict[str, Any] = {"orders": {}, "refunds": [], "escalations": [], "emails": []}
 
 
+def _deep_copy(value: Any) -> Any:
+    """Copy a JSON-compatible value via a JSON round trip."""
+    return json.loads(json.dumps(value))
+
+
 class JsonStore:
     """Reads and writes the whole state document on every operation."""
 
@@ -18,8 +23,8 @@ class JsonStore:
     @classmethod
     def create(cls, path: Path, initial_state: dict[str, Any]) -> "JsonStore":
         """Write ``initial_state`` over an empty state and return a store for it."""
-        state = {key: json.loads(json.dumps(value)) for key, value in EMPTY_STATE.items()}
-        state.update(json.loads(json.dumps(initial_state)))
+        state = {key: _deep_copy(value) for key, value in EMPTY_STATE.items()}
+        state.update(_deep_copy(initial_state))
         store = cls(path)
         store.save(state)
         return store
