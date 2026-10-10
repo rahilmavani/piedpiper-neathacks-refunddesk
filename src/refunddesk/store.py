@@ -17,6 +17,7 @@ class JsonStore:
 
     @classmethod
     def create(cls, path: Path, initial_state: dict[str, Any]) -> "JsonStore":
+        """Write ``initial_state`` over an empty state and return a store for it."""
         state = {key: json.loads(json.dumps(value)) for key, value in EMPTY_STATE.items()}
         state.update(json.loads(json.dumps(initial_state)))
         store = cls(path)
@@ -24,6 +25,7 @@ class JsonStore:
         return store
 
     def load(self) -> dict[str, Any]:
+        """Return a fresh copy of the whole state document."""
         return json.loads(self.path.read_text())
 
     def save(self, state: dict[str, Any]) -> None:
