@@ -29,3 +29,10 @@ def test_rate_differs_across_seeds():
         plan = FaultPlan.from_task("task", seed, rules)
         patterns.add(tuple(plan.next_fault("x") for _ in range(6)))
     assert len(patterns) > 1
+
+
+def test_unknown_kind_is_rejected():
+    import pytest
+
+    with pytest.raises(ValueError):
+        FaultPlan.from_task("t", 0, [{"tool": "x", "kind": "explode"}])
