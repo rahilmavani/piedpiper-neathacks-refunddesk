@@ -28,7 +28,11 @@ REFUND_POLICY: dict[str, Any] = {
 
 @dataclass
 class ToolRuntime:
-    """Per-run state shared by the tools: store, fault plan and call log."""
+    """Per-run state shared by the tools: store, fault plan and call log.
+
+    Every attempt is logged, including injected timeouts and failures, so the
+    eval checks can see retries as well as outcomes.
+    """
 
     store: JsonStore
     faults: FaultPlan
