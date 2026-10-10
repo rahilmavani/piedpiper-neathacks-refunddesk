@@ -27,6 +27,7 @@ class JsonStore:
         return json.loads(self.path.read_text())
 
     def save(self, state: dict[str, Any]) -> None:
+        """Write the whole document via a temp file so readers never see a partial file."""
         self.path.parent.mkdir(parents=True, exist_ok=True)
         tmp = self.path.with_suffix(".tmp")
         tmp.write_text(json.dumps(state, indent=2, sort_keys=True))
