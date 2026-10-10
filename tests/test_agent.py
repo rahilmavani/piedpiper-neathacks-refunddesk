@@ -118,3 +118,8 @@ def test_history_window_cuts_at_user_messages(scripted):
     window = agent._window()
     assert window[0] == {"role": "user", "content": "2"}
     assert len(window) == 4
+
+
+def test_parameterless_tool_rejects_arguments():
+    with pytest.raises(ToolArgumentError):
+        parse_tool_arguments(call("get_refund_policy", {"anything": 1}))
