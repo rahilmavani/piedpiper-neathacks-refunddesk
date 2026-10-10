@@ -23,6 +23,12 @@ class ConfigError(RuntimeError):
 
 @dataclass(frozen=True)
 class Settings:
+    """Agent settings.
+
+    ``history_window`` is the number of recent messages sent to the model; it can
+    be overridden with ``REFUNDDESK_HISTORY_WINDOW``.
+    """
+
     provider: str
     model: str
     temperature: float = 0.0
