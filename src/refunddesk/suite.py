@@ -40,7 +40,7 @@ def _run_one(task_id: str, rep: int, seed: int, run_id: str, commit: str) -> dic
     return result
 
 
-def main(argv: list[str] | None = None) -> int:
+def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog="python -m refunddesk.suite", description=__doc__)
     parser.add_argument("--reps", type=int, default=3)
     parser.add_argument("--seed", type=int, default=0)
@@ -49,7 +49,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--task", action="append", help="limit to these task ids (repeatable)")
     parser.add_argument("--run-id", default=None)
     parser.add_argument("--out", type=Path, default=None)
-    args = parser.parse_args(argv)
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parse_args(argv)
 
     tasks = [t for t in list_tasks(include_heldout=not args.no_heldout) if not args.task or t.id in args.task]
     run_id = args.run_id or f"suite-{time.strftime('%Y%m%dT%H%M%S')}"
