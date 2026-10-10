@@ -16,6 +16,7 @@ import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from typing import Any
 
 from .config import PROJECT_ROOT
 from .tasks import list_tasks
@@ -26,7 +27,7 @@ def _git_head() -> str:
     return out.stdout.strip() or "unknown"
 
 
-def _run_one(task_id: str, rep: int, seed: int, run_id: str, commit: str) -> dict:
+def _run_one(task_id: str, rep: int, seed: int, run_id: str, commit: str) -> dict[str, Any]:
     env = dict(os.environ, CULPRIT_RUN_ID=run_id, COMMIT_SHA=commit, TASK_ID=task_id, REPETITION=str(rep))
     proc = subprocess.run(
         [sys.executable, "-m", "refunddesk.eval", "--task", task_id, "--seed", str(seed)],
